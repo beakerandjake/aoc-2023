@@ -9,22 +9,26 @@
 const sum = (numbers) => numbers.reduce((acc, x) => acc + x, 0);
 
 /**
- * Sanitizes the calibration document and returns the sum of the calibration values.
+ * Returns the sanitized calibration values.
  */
-const sumOfCalibrationValues = (lines, filterDigitCharsFn, mapDigitFn) =>
-  sum(
-    lines
-      .map((line) => filterDigitCharsFn(line))
-      .map((digitChars) => [digitChars[0], digitChars.at(-1)])
-      .map((firstAndLast) => firstAndLast.map(mapDigitFn))
-      .map((digits) => Number(digits.join("")))
-  );
+const calibrationValues = (lines, filterDigitCharsFn, mapDigitFn) =>
+  lines
+    .map((line) => filterDigitCharsFn(line))
+    .map((digitChars) => [digitChars[0], digitChars.at(-1)])
+    .map((firstAndLast) => firstAndLast.map(mapDigitFn))
+    .map((digits) => Number(digits.join("")));
+
+/**
+ * Returns the sum of the sanitized calibration values.
+ */
+const solve = (lines, filterDigitCharsFn, mapDigitFn) =>
+  sum(calibrationValues(lines, filterDigitCharsFn, mapDigitFn));
 
 /**
  * Returns the solution for level one of this puzzle.
  */
 export const levelOne = ({ lines }) =>
-  sumOfCalibrationValues(
+  solve(
     lines,
     (line) => line.match(/\d/g),
     (x) => x
@@ -46,7 +50,7 @@ export const levelTwo = ({ lines }) => {
     ["eight", "8"],
     ["nine", "9"],
   ]);
-  return sumOfCalibrationValues(
+  return solve(
     lines,
     (line) => [...line.matchAll(digitRegex)].map((match) => match[1]),
     (str) => wordToDigit.get(str) || str
