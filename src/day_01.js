@@ -4,31 +4,21 @@
  */
 
 /**
- * Sums an array of numbers.
+ * Returns the sum of the sanitized calibration values.
  */
-const sum = (numbers) => numbers.reduce((acc, x) => acc + x, 0);
-
-/**
- * Returns the sanitized calibration values.
- */
-const calibrationValues = (lines, filterDigitCharsFn, mapDigitFn) =>
+const sumOfCalibrationValues = (lines, filterDigitCharsFn, mapDigitFn) =>
   lines
     .map((line) => filterDigitCharsFn(line))
     .map((digitChars) => [digitChars[0], digitChars.at(-1)])
     .map((firstAndLast) => firstAndLast.map(mapDigitFn))
-    .map((digits) => Number(digits.join("")));
-
-/**
- * Returns the sum of the sanitized calibration values.
- */
-const solve = (lines, filterDigitCharsFn, mapDigitFn) =>
-  sum(calibrationValues(lines, filterDigitCharsFn, mapDigitFn));
+    .map((digits) => Number(digits.join("")))
+    .reduce((sum, value) => sum + value, 0);
 
 /**
  * Returns the solution for level one of this puzzle.
  */
 export const levelOne = ({ lines }) =>
-  solve(
+  sumOfCalibrationValues(
     lines,
     (line) => line.match(/\d/g),
     (x) => x
@@ -50,7 +40,7 @@ export const levelTwo = ({ lines }) => {
     ["eight", "8"],
     ["nine", "9"],
   ]);
-  return solve(
+  return sumOfCalibrationValues(
     lines,
     (line) => [...line.matchAll(digitRegex)].map((match) => match[1]),
     (str) => wordToDigit.get(str) || str
