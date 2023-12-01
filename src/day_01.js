@@ -4,15 +4,39 @@
  */
 
 /**
- * Returns the solution for level one of this puzzle.
- * @param {Object} args - Provides both raw and split input.
- * @param {String} args.input - The original, unparsed input string.
- * @param {String[]} args.lines - Array containing each line of the input string.
- * @returns {Number|String}
+ * Returns an array containing the first and last matches of the regex.
  */
-export const levelOne = ({ input, lines }) => {
-  // your code here
+const firstAndLastMatches = (line, digitRegex) => {
+  const matches = line.match(digitRegex);
+  return [matches[0], matches.at(-1)];
 };
+
+/**
+ * Concats digit characters together to form a number
+ */
+const toNumber = (digits) => Number(digits.join(""));
+
+/**
+ * Sums an array of numbers.
+ */
+const sum = (numbers) => numbers.reduce((acc, x) => acc + x, 0);
+
+/**
+ * Sanitizes the calibration document and returns the sum of the calibration values.
+ */
+const sumOfCalibrationValues = (lines, digitRegex, digitMapFn) =>
+  sum(
+    lines
+      .map((line) => firstAndLastMatches(line, digitRegex)) // extract the first and last 'digit'
+      .map((digits) => digits.map(digitMapFn)) // map each 'digit' to a 0-9 value
+      .map(toNumber) // concat the digits into a number
+  );
+
+/**
+ * Returns the solution for level one of this puzzle.
+ */
+export const levelOne = ({ lines }) =>
+  sumOfCalibrationValues(lines, /\d/g, (x) => x);
 
 /**
  * Returns the solution for level two of this puzzle.
@@ -22,5 +46,18 @@ export const levelOne = ({ input, lines }) => {
  * @returns {Number|String}
  */
 export const levelTwo = ({ input, lines }) => {
-  // your code here
+  const regexp = /(one|two|three|four|five|six|seven|eight|nine|\d)/g;
+  const wordToDigit = new Map([
+    ["one", 1],
+    ["two", 2],
+    ["three", 3],
+    ["four", 4],
+    ["five", 5],
+    ["six", 6],
+    ["seven", 7],
+    ["eight", 8],
+    ["nine", 9],
+  ]);
+  const mapDigit = (str) => (wordToDigit.has(str) ? wordToDigit.get(str) : str);
+  return sumOfCalibrationValues(lines, regexp, mapDigit);
 };
