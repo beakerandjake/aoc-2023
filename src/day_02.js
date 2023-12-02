@@ -17,8 +17,8 @@ const parseLine = (line) => {
   const [id, cubes] = line.split(":");
   return {
     id: id.match(/Game (\d+)/)[1],
-    // compress all of the draws into one taking the largest count of each color.
     cubes: cubes.split(";").reduce((acc, handful) => {
+      // compress all of the draws into one taking the largest count of each color.
       for (const cube of handful.split(",")) {
         const [, count, color] = cube.match(/(\d+) (red|green|blue)/);
         acc[indexes[color]] = Math.max(acc[indexes[color]], count);
