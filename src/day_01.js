@@ -1,3 +1,5 @@
+import { sum } from "./util/array.js";
+
 /**
  * Contains solutions for Day 1
  * Puzzle Description: https://adventofcode.com/2023/day/1
@@ -7,12 +9,13 @@
  * Returns the sum of the sanitized calibration values.
  */
 const sumOfCalibrationValues = (lines, filterDigitCharsFn, mapDigitFn) =>
-  lines
-    .map((line) => filterDigitCharsFn(line))
-    .map((digitChars) => [digitChars[0], digitChars.at(-1)])
-    .map((firstAndLast) => firstAndLast.map(mapDigitFn))
-    .map((digits) => Number(digits.join("")))
-    .reduce((sum, value) => sum + value, 0);
+  sum(
+    lines
+      .map((line) => filterDigitCharsFn(line))
+      .map((digitChars) => [digitChars[0], digitChars.at(-1)])
+      .map((firstAndLast) => firstAndLast.map(mapDigitFn))
+      .map((digits) => Number(digits.join("")))
+  );
 
 /**
  * Returns the solution for level one of this puzzle.
