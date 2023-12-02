@@ -1,9 +1,9 @@
-import { sum } from "./util/array.js";
-
 /**
  * Contains solutions for Day 1
  * Puzzle Description: https://adventofcode.com/2023/day/1
  */
+
+import { sum } from "./util/array.js";
 
 /**
  * Returns the sum of the sanitized calibration values.
