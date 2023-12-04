@@ -17,4 +17,24 @@ export class Vector2 {
  * @param {Vector2} lhs
  * @param {Vector2} rhs
  */
-export const add = (lhs, rhs) => new Vector2(lhs.x + rhs.x, lhs.y + rhs.y);
+export const add = (lhs, rhs) => new Vector2(lhs.y + rhs.y, lhs.x + rhs.x);
+
+/**
+ * Shorthand for writing Vector2(-1, 0).
+ */
+export const up = new Vector2(-1, 0);
+
+/**
+ * Shorthand for writing Vector2(1, 0).
+ */
+export const down = new Vector2(1, 0);
+
+/**
+ * Shorthand for writing Vector2(0, 1).
+ */
+export const right = new Vector2(0, 1);
+
+/**
+ * Shorthand for writing Vector2(0, -1).
+ */
+export const left = new Vector2(0, -1);
