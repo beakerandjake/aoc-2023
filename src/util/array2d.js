@@ -14,10 +14,10 @@
  * Convert an array of strings into a flat 2d array.
  * Each string in the array is considered a row, and each character of that string is treated as a column.
  * @param {String[]} array - Array of equal length strings to convert to a flat 2d array.
- * @param {(char:String, y:Number, x:Number) => String} characterMapFn - Map function invoked on every char of the string
+ * @param {(char:String, y:Number, x:Number) => String} mapFn - Map function invoked on every char of the string
  * @returns {FlatArray}
  */
-export const arr2d = (array, mapFn = (char, y, x) => char) => {
+export const arr2d = (array, mapFn = (char) => char) => {
   if (!array.length) {
     return { items: [], shape: { width: 0, height: 0 } };
   }
@@ -81,7 +81,7 @@ export const arr2dForEach = (arr2d, callbackFn) => {
  * @param {FlatArray} arr2d - A flat 2d array.
  * @param {(element:any,y:number,x:number) => string} renderFn - Function invoked on each element in the array, returns the string to use to render this element.
  */
-export const arr2dToStr = (arr2d, renderFn = (item, y, x) => item) => {
+export const arr2dToStr = (arr2d, renderFn = (item) => item) => {
   const rows = [...Array(arr2d.shape.height)].map(() => []);
   arr2dForEach(arr2d, (element, y, x) => {
     rows[y].push(renderFn(element, y, x));

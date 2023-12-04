@@ -1,4 +1,4 @@
-import { Vector2, add, up, down, left, right } from "./vector2.js";
+import { add, up, down, left, right } from "./vector2.js";
 
 /**
  * Deltas for the Von Neumann neighborhood of a cell.
