@@ -54,22 +54,21 @@ export const world2d = ({ width }, index) => ({
 
 /**
  * Returns the element at the <y,x> coordinate of the flat 2d array.
- * @param {FlatArray} arr2d
+ * @param {FlatArray} arr
  * @param {number} y
  * @param {number} x
  */
-export const elementAt2d = (arr2d, y, x) =>
-  arr2d.items[index2d(arr2d.shape, y, x)];
+export const elementAt2d = (arr, y, x) => arr.items[index2d(arr.shape, y, x)];
 
 /**
  * Executes the callback function once per array element.
- * @param {FlatArray} arr2d
+ * @param {FlatArray} arr
  * @param {(element:any, y:number, x:number) => boolean} callbackFn - Function invoked for every element of the array. Can explicitly return false to stop evaluation.
  */
-export const arr2dForEach = (arr2d, callbackFn) => {
-  for (let index = 0; index < arr2d.items.length; index++) {
-    const { y, x } = world2d(arr2d.shape, index);
-    const result = callbackFn(arr2d.items[index], y, x);
+export const arr2dForEach = (arr, callbackFn) => {
+  for (let index = 0; index < arr.items.length; index++) {
+    const { y, x } = world2d(arr.shape, index);
+    const result = callbackFn(arr.items[index], y, x);
     if (result === false) {
       break;
     }
@@ -78,12 +77,12 @@ export const arr2dForEach = (arr2d, callbackFn) => {
 
 /**
  * Returns a string visualizing the flattened 2d array.
- * @param {FlatArray} arr2d - A flat 2d array.
+ * @param {FlatArray} arr - A flat 2d array.
  * @param {(element:any,y:number,x:number) => string} renderFn - Function invoked on each element in the array, returns the string to use to render this element.
  */
-export const arr2dToStr = (arr2d, renderFn = (item) => item) => {
-  const rows = [...Array(arr2d.shape.height)].map(() => []);
-  arr2dForEach(arr2d, (element, y, x) => {
+export const arr2dToStr = (arr, renderFn = (item) => item) => {
+  const rows = [...Array(arr.shape.height)].map(() => []);
+  arr2dForEach(arr, (element, y, x) => {
     rows[y].push(renderFn(element, y, x));
   });
   return rows.map((row) => row.join("")).join("\n");
