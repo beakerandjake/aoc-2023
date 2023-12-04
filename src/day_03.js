@@ -3,7 +3,7 @@
  * Puzzle Description: https://adventofcode.com/2023/day/3
  */
 
-import { sum } from "./util/array.js";
+import { sum, product } from "./util/array.js";
 import { mooreNeighborhood, neighborsForEach } from "./util/neighbors.js";
 import { consume, isNumeric } from "./util/string.js";
 import { Vector2 } from "./util/vector2.js";
@@ -51,34 +51,35 @@ class Schematic {
  * Returns a 2d array of the components on each line of the schematic.
  */
 const parseComponents = (schematic) => {
+  const parts = [...Array(schematic.height)].map(() => []);
+  const symbols = [];
+  // find all parts and symbols on this line of the schematic.
   const parseLine = (line, y) => {
-    const symbols = [];
-    const parts = [];
     let x = 0;
     while (x < line.length) {
       let consumed = 1;
       if (isNumeric(line[x])) {
         consumed = consume(line, x, isNumeric) - x;
-        parts.push(new SchematicComponent(y, x, consumed));
+        parts[y].push(new SchematicComponent(y, x, consumed));
       } else if (line[x] !== ".") {
         symbols.push(new SchematicComponent(y, x, 1));
       }
       x += consumed;
     }
-    return { symbols, parts };
   };
-  return schematic.lines.reduce((acc, line, y) => {
-    acc.push(parseLine(line, y));
-    return acc;
-  }, []);
+  schematic.lines.forEach(parseLine);
+  return { parts, symbols };
 };
 
-const findComponent = (position, components) => {
+/**
+ * Returns the first component which intersects with the position (if any)
+ */
+const findIntersectingPart = (position, parts) => {
   let l = 0;
-  let u = components.length - 1;
+  let u = parts.length - 1;
   while (l <= u) {
     const m = Math.floor(l + (u - l) / 2);
-    const component = components[m];
+    const component = parts[m];
     if (position.x < component.origin.x) {
       u = m - 1;
     } else if (position.x >= component.origin.x + component.width) {
@@ -93,39 +94,48 @@ const findComponent = (position, components) => {
 /**
  * Returns an array containing all the moore neighbors of the position who are parts.
  */
-const findAdjacentParts = (schematic, components, position) => {
-  const parts = new Set();
+const findPartNumbers = (schematic, parts, position) => {
+  const partNumbers = new Set();
   neighborsForEach(position, mooreNeighborhood, (neighbor) => {
     if (schematic.inBounds(neighbor)) {
-      const part = findComponent(neighbor, components[neighbor.y].parts);
-      if (part) {
-        parts.add(part);
+      const intersecting = findIntersectingPart(neighbor, parts[neighbor.y]);
+      if (intersecting) {
+        partNumbers.add(intersecting);
       }
     }
   });
-  return [...parts];
+  return [...partNumbers];
 };
 
 /**
  * Returns the solution for level one of this puzzle.
  */
 export const levelOne = ({ lines }) => {
-  const adjacentParts = [];
+  const partNumbers = [];
   const schematic = new Schematic(lines);
-  const components = parseComponents(schematic);
-  for (const row of components) {
-    for (const symbol of row.symbols) {
-      adjacentParts.push(
-        ...findAdjacentParts(schematic, components, symbol.origin)
-      );
-    }
+  const { parts, symbols } = parseComponents(schematic);
+  for (const { origin } of symbols) {
+    partNumbers.push(...findPartNumbers(schematic, parts, origin));
   }
-  return sum(adjacentParts.map((x) => Number(schematic.getComponent(x))));
+  return sum(partNumbers.map((x) => Number(schematic.getComponent(x))));
 };
 
 /**
  * Returns the solution for level two of this puzzle.
  */
-export const levelTwo = ({ input, lines }) => {
-  // your code here
+export const levelTwo = ({ lines }) => {
+  const gearRatios = [];
+  const schematic = new Schematic(lines);
+  const { parts, symbols } = parseComponents(schematic);
+  for (const symbol of symbols) {
+    if (schematic.getComponent(symbol) === "*") {
+      const partNumbers = findPartNumbers(schematic, parts, symbol.origin);
+      if (partNumbers.length === 2) {
+        gearRatios.push(
+          product(partNumbers.map((p) => Number(schematic.getComponent(p))))
+        );
+      }
+    }
+  }
+  return sum(gearRatios);
 };
