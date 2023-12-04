@@ -183,3 +183,14 @@ export const arr2dToStr = (arr2d, renderFn = (item, y, x) => item) => {
   });
   return rows.map((row) => row.join("")).join("\n");
 };
+
+/**
+ * Returns a new flat 2d array filled with the value. Note all elements in the array will be this exact value: if value is an object, each slot in the array will reference that object.
+ * @returns {FlatArray}
+ * @param {Number} y
+ * @param {Number} x
+ */
+export const fill2d = (height, width, value) => ({
+  items: Array(height * width).fill(value),
+  shape: { height, width },
+});
