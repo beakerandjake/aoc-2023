@@ -3,12 +3,12 @@ import { Vector2, add, up, down, left, right } from "./vector2.js";
 /**
  * Deltas for the Von Neumann neighborhood of a cell.
  */
-export const vonNeumannNeighborhood = Object.freeze([up, down, left, right]);
+export const vonNeumannNeighborhood = [up, down, left, right];
 
 /**
  * Deltas for the Moore neighborhood of a cell.
  */
-export const mooreNeighborhood = Object.freeze([
+export const mooreNeighborhood = [
   add(up, left),
   up,
   add(up, right),
@@ -17,9 +17,7 @@ export const mooreNeighborhood = Object.freeze([
   down,
   add(down, left),
   left,
-]);
-
-console.log(mooreNeighborhood);
+];
 
 /**
  * Executes the callback function once per in bounds neighbor

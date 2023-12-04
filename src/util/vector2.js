@@ -8,7 +8,7 @@ export class Vector2 {
   }
 
   toString() {
-    return ` ${this.y} ${this.x}`;
+    return `<${this.y},${this.x}>`;
   }
 }
 
