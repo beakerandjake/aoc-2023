@@ -1,8 +1,48 @@
 env:
-  es2021: true
+  es2022: true
   node: true
-extends: eslint:recommended
+extends:
+  - eslint:recommended
+  - prettier
 parserOptions:
   ecmaVersion: latest
   sourceType: module
-rules: {}
+rules:
+  no-unused-vars: off # todo remove
+  array-callback-return: error
+  no-constant-binary-expression: error
+  no-duplicate-imports: error
+  no-new-native-nonconstructor: error
+  no-self-compare: error
+  no-template-curly-in-string: error
+  no-unmodified-loop-condition: error
+  no-unreachable-loop: error
+  no-unused-private-class-members: error
+  no-use-before-define: error
+  use-isnan: error
+  arrow-body-style:
+    - error
+    - as-needed
+  block-scoped-var: error
+  camelcase: error
+  class-methods-use-this: error
+  consistent-return: error
+  default-param-last: error
+  dot-notation: error
+  eqeqeq: 
+    - error
+    - always 
+    - null: ignore
+  func-style:
+    - error
+    - expression
+  guard-for-in: error
+  logical-assignment-operators: error
+  multiline-comment-style: error
+  new-cap: error
+  no-array-constructor: error
+  no-continue: error
+  no-else-return: error
+  no-empty-function: error
+  no-inline-comments: error
+  no-lone-blocks: error

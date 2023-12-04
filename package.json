@@ -17,6 +17,7 @@
     "advent-of-code-runner": "^1.6.1"
   },
   "devDependencies": {
-    "eslint": "^8.55.0"
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0"
   }
 }
