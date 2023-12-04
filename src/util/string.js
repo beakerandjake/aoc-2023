@@ -20,3 +20,13 @@ export const consume = (str, start, matchFn) => {
   }
   return i;
 };
+
+/**
+ * Splits the string on the delimiter and invokes the map function for each delimited substring.
+ * @param {string} str
+ * @param {string|Regexp} delimiter
+ * @param {(string) => any} mapFn
+ * @returns {array}
+ */
+export const parseDelimited = (str, delimiter, mapFn) =>
+  str.split(delimiter).map(mapFn);
