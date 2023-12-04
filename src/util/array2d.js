@@ -1,7 +1,7 @@
 /**
  * @typedef {Object} Shape
- * @property {Number} width - The width of the 2d array.
- * @property {Number} height - The height of the 2d array.
+ * @property {number} width - The width of the 2d array.
+ * @property {number} height - The height of the 2d array.
  */
 
 /**
@@ -13,8 +13,8 @@
 /**
  * Convert an array of strings into a flat 2d array.
  * Each string in the array is considered a row, and each character of that string is treated as a column.
- * @param {String[]} array - Array of equal length strings to convert to a flat 2d array.
- * @param {(char:String, y:Number, x:Number) => String} mapFn - Map function invoked on every char of the string
+ * @param {string[]} array - Array of equal length strings to convert to a flat 2d array.
+ * @param {(char:string, y:number, x:number) => string} mapFn - Map function invoked on every char of the string
  * @returns {FlatArray}
  */
 export const arr2d = (array, mapFn = (char) => char) => {
@@ -37,15 +37,15 @@ export const arr2d = (array, mapFn = (char) => char) => {
 /**
  * Converts the world (x,y) coordinate to a flat 2d index.
  * @param {Shape} shape - The shape of the flat 2d array.
- * @param {Number} y - The y (row).
- * @param {Number} x - The x (col).
+ * @param {number} y - The y (row).
+ * @param {number} x - The x (col).
  */
 export const index2d = ({ width }, y, x) => width * y + x;
 
 /**
  * Converts the flat 2d index to a world (x,y) coordinate.
  * @param {Shape} shape - The shape of the flat 2d array.
- * @param {Number} index - The flat 2d index to convert.
+ * @param {number} index - The flat 2d index to convert.
  */
 export const world2d = ({ width }, index) => ({
   y: Math.floor(index / width),
@@ -55,8 +55,8 @@ export const world2d = ({ width }, index) => ({
 /**
  * Returns the element at the <y,x> coordinate of the flat 2d array.
  * @param {FlatArray} arr2d
- * @param {Number} y
- * @param {Number} x
+ * @param {number} y
+ * @param {number} x
  */
 export const elementAt2d = (arr2d, y, x) =>
   arr2d.items[index2d(arr2d.shape, y, x)];
@@ -64,7 +64,7 @@ export const elementAt2d = (arr2d, y, x) =>
 /**
  * Executes the callback function once per array element.
  * @param {FlatArray} arr2d
- * @param {(element:any, y:Number, x:Number) => boolean} callbackFn - Function invoked for every element of the array. Can explicitly return false to stop evaluation.
+ * @param {(element:any, y:number, x:number) => boolean} callbackFn - Function invoked for every element of the array. Can explicitly return false to stop evaluation.
  */
 export const arr2dForEach = (arr2d, callbackFn) => {
   for (let index = 0; index < arr2d.items.length; index++) {
@@ -92,8 +92,8 @@ export const arr2dToStr = (arr2d, renderFn = (item) => item) => {
 /**
  * Returns a new flat 2d array filled with the value. Note all elements in the array will be this exact value: if value is an object, each slot in the array will reference that object.
  * @returns {FlatArray}
- * @param {Number} y
- * @param {Number} x
+ * @param {number} y
+ * @param {number} x
  */
 export const fill2d = (height, width, value) => ({
   items: Array(height * width).fill(value),

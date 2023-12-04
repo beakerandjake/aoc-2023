@@ -20,10 +20,10 @@ export const mooreNeighborhood = [
 ];
 
 /**
- * Executes the callback function once per in bounds neighbor
+ * Executes the callback function once per neighbor
  * @param {Vector2} position - The point whose neighbors to iterate.
- * @param {Vector2[]} neighborDeltas - The directions of each neighbor.
- * @param {(Vector2) => void} callbackFn - The function invoked on each in bounds neighbor.
+ * @param {Vector2[]} neighborDeltas - The deltas which lead to each neighbor.
+ * @param {(Vector2) => void} callbackFn - The function invoked on each neighbor.
  */
 export const neighborsForEach = (position, neighborDeltas, callbackFn) => {
   for (const delta of neighborDeltas) {
