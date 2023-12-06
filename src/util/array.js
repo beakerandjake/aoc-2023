@@ -22,3 +22,14 @@ export const frequencyMap = (items) =>
     (acc, item) => acc.set(item, (acc.get(item) || 0) + 1),
     new Map()
   );
+
+/**
+ * Creates an array of elements split into pairs. If the array cannot be split evenly the final pair will have one element
+ * @param {Array}
+ * @returns {Array}
+ */
+export const pairs = (array) =>
+  array.reduce(
+    (acc, _, i) => (i % 2 === 0 ? [...acc, array.slice(i, i + 2)] : acc),
+    []
+  );
