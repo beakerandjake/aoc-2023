@@ -4,7 +4,11 @@
  */
 
 import { parseDelimited } from "./util/string.js";
+import { pairs } from "./util/array.js";
 
+/**
+ * Parse the lines of the input and returns an almanac.
+ */
 const parseAlmanac = (lines) => {
   // parse a x-to-y map and its entries.
   const parseMap = (start) => {
@@ -30,15 +34,34 @@ const parseAlmanac = (lines) => {
     return maps;
   };
   return {
-    seeds: parseDelimited(lines[0].split(":")[1].trim(), " "),
+    seeds: parseDelimited(lines[0].split(":")[1].trim(), " ", Number),
     maps: parseMaps(2),
   };
 };
 
+/**
+ * The dest start of the range.
+ */
 const dest = (range) => range[0];
+
+/**
+ * The source start of the range.
+ */
 const src = (range) => range[1];
+
+/**
+ * The length of a range.
+ */
 const len = (range) => range[2];
+
+/**
+ * Translate a source x to the ranges dest x.
+ */
 const translate = (x, range) => x - src(range) + dest(range);
+
+/**
+ * Returns the first range which covers value x.
+ */
 const findRange = (x, ranges) => {
   let l = 0;
   let u = ranges.length - 1;
@@ -56,6 +79,9 @@ const findRange = (x, ranges) => {
   return null;
 };
 
+/**
+ * Maps a source value to a destination value.
+ */
 const mapValue = (srcKey, srcValue, destKey, maps) => {
   let currentKey = srcKey;
   let currentValue = srcValue;
@@ -80,13 +106,14 @@ export const levelOne = ({ lines }) => {
  * Returns the solution for level two of this puzzle.
  */
 export const levelTwo = ({ lines }) => {
-  const { maps } = parseAlmanac(lines);
-  for (const { dest: d, ranges } of maps.values()) {
-    const logs = [`dest:${d}`];
-    for (const range of ranges) {
-      logs.push(range);
+  const { seeds, maps } = parseAlmanac(lines);
+  const seedRanges = pairs(seeds);
+  let lowest = Number.MAX_SAFE_INTEGER;
+  for (const [seedStart, length] of seedRanges) {
+    const seedEnd = seedStart + length;
+    for (let seed = seedStart; seed < seedEnd; seed++) {
+      lowest = Math.min(mapValue("seed", seed, "location", maps), lowest);
     }
-    console.log(logs.join("\n"));
   }
-  return 124;
+  return lowest;
 };
