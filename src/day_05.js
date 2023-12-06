@@ -6,6 +6,48 @@
 import { parseDelimited } from "./util/string.js";
 import { pairs, binarySearch } from "./util/array.js";
 
+class MapRange {
+  constructor([dest, start, length]) {
+    this.start = start;
+    this.end = start + length;
+    this.dest = dest;
+  }
+
+  covers(x) {
+    return x >= this.start && x < this.end;
+  }
+
+  translate(x) {
+    return x - this.start + this.dest;
+  }
+
+  compare(x) {
+    if (x < this.start) {
+      return -1;
+    } else if (x >= this.end) {
+      return 1;
+    }
+    return 0;
+  }
+}
+
+class Map {
+  constructor(ranges) {
+    // sort ranges for binary search.
+    this.ranges = ranges.sort((a, b) => a.start - b.start);
+    this.cachedRange = null;
+  }
+
+  translate(x) {
+    // assume that a recently used range will likely be used again.
+    if (!this.cachedRange || !this.cachedRange.covers(x)) {
+      const range = binarySearch(this.ranges, (r) => r.compare(x));
+      this.cachedRange = range >= 0 ? this.ranges[range] : null;
+    }
+    return this.cachedRange ? this.cachedRange.translate(x) : x;
+  }
+}
+
 /**
  * Parse the lines of the input and returns an almanac.
  */
@@ -17,11 +59,10 @@ const parseAlmanac = (lines) => {
     let i = start + 1;
     // consume all range entries until an empty line is reached.
     while (i < lines.length && lines[i]) {
-      ranges.push(parseDelimited(lines[i], " ", Number));
+      ranges.push(new MapRange(parseDelimited(lines[i], " ", Number)));
       i++;
     }
-    // sort ranges for binary search
-    return [ranges.sort((a, b) => a[1] - b[1]), i];
+    return [ranges, i];
   };
   // parse each x-to-y map.
   const parseMaps = (start) => {
@@ -29,7 +70,7 @@ const parseAlmanac = (lines) => {
     let i = start;
     while (i < lines.length) {
       const [ranges, newIndex] = parseMap(i);
-      maps.push(ranges);
+      maps.push(new Map(ranges));
       i = newIndex + 1;
     }
     return maps;
@@ -41,40 +82,10 @@ const parseAlmanac = (lines) => {
 };
 
 /**
- * The dest start of the range.
- */
-const dest = (range) => range[0];
-
-/**
- * The source start of the range.
- */
-const src = (range) => range[1];
-
-/**
- * The length of a range.
- */
-const len = (range) => range[2];
-
-/**
- * Translate a source x to the ranges dest x.
- */
-const translate = (x, range) => x - src(range) + dest(range);
-
-/**
  * Maps a source value to a destination value.
  */
 const mapValue = (value, maps) =>
-  maps.reduce((current, ranges) => {
-    const range = binarySearch(ranges, (r) => {
-      if (current < src(r)) {
-        return -1;
-      } else if (current > src(r) + len(r)) {
-        return 1;
-      }
-      return 0;
-    });
-    return range >= 0 ? translate(current, ranges[range]) : current;
-  }, value);
+  maps.reduce((acc, map) => map.translate(acc), value);
 
 /**
  * Returns the solution for level one of this puzzle.
