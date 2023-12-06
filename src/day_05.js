@@ -83,14 +83,11 @@ const findRange = (x, ranges) => {
 /**
  * Maps a source value to a destination value.
  */
-const mapValue = (value, maps) => {
-  let current = value;
-  for (let i = 0; i < maps.length; i++) {
-    const range = findRange(current, maps[i]);
-    current = range ? translate(current, range) : current;
-  }
-  return current;
-};
+const mapValue = (value, maps) =>
+  maps.reduce((current, ranges) => {
+    const range = findRange(current, ranges);
+    return range ? translate(current, range) : current;
+  }, value);
 
 /**
  * Returns the solution for level one of this puzzle.
@@ -114,3 +111,23 @@ export const levelTwo = ({ lines }) => {
   }
   return lowest;
 };
+
+// const hit = [
+//   2165573804, 
+//   2147782144, 
+//   1921208416,
+//   1913168713,
+//   2138332329,
+//   2118300166,
+//   1895958020,
+// ];
+
+// const miss = [
+//   42419004, 
+//   60210664, 
+//   286784392, 
+//   294824095, 
+//   69660479, 
+//   89692642, 
+//   312034788,
+// ];
