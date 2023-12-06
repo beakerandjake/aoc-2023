@@ -28,6 +28,7 @@ const parseAlmanac = (lines) => {
     let i = start;
     while (i < lines.length) {
       const [ranges, newIndex] = parseMap(i);
+      // sort ranges for binary search
       maps.push(ranges.sort((a, b) => a[1] - b[1]));
       i = newIndex + 1;
     }
@@ -109,7 +110,7 @@ export const levelTwo = ({ lines }) => {
   for (const [seedStart, length] of seedRanges) {
     const seedEnd = seedStart + length;
     for (let seed = seedStart; seed < seedEnd; seed++) {
-      lowest = Math.min(mapValue("seed", seed, "location", maps), lowest);
+      lowest = Math.min(mapValue(seed, maps), lowest);
     }
   }
   return lowest;
