@@ -24,7 +24,7 @@ const parseAlmanac = (lines) => {
     let i = start;
     while (i < lines.length) {
       const [src, dest, ranges, newIndex] = parseMap(i);
-      maps.set(src, { dest, ranges });
+      maps.set(src, { dest, ranges: ranges.sort((a, b) => a[1] - b[1]) });
       i = newIndex + 1;
     }
     return maps;
@@ -39,8 +39,22 @@ const dest = (range) => range[0];
 const src = (range) => range[1];
 const len = (range) => range[2];
 const translate = (x, range) => x - src(range) + dest(range);
-const inRange = (x, range) => x >= src(range) && x <= src(range) + len(range);
-const findRange = (x, ranges) => ranges.find((r) => inRange(x, r));
+const findRange = (x, ranges) => {
+  let l = 0;
+  let u = ranges.length - 1;
+  while (l <= u) {
+    const m = (l + u) >> 1;
+    const r = ranges[m];
+    if (x < src(r)) {
+      u = m - 1;
+    } else if (x >= src(r) + len(r)) {
+      l = m + 1;
+    } else {
+      return r;
+    }
+  }
+  return null;
+};
 
 const mapValue = (srcKey, srcValue, destKey, maps) => {
   let currentKey = srcKey;
@@ -65,4 +79,14 @@ export const levelOne = ({ lines }) => {
 /**
  * Returns the solution for level two of this puzzle.
  */
-export const levelTwo = ({ input, lines }) => {};
+export const levelTwo = ({ lines }) => {
+  const { maps } = parseAlmanac(lines);
+  for (const { dest: d, ranges } of maps.values()) {
+    const logs = [`dest:${d}`];
+    for (const range of ranges) {
+      logs.push(range);
+    }
+    console.log(logs.join("\n"));
+  }
+  return 124;
+};
