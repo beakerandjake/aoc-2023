@@ -12,23 +12,23 @@ import { pairs } from "./util/array.js";
 const parseAlmanac = (lines) => {
   // parse a x-to-y map and its entries.
   const parseMap = (start) => {
-    const [, src, dest] = lines[start].match(/(\w+)-to-(\w+)/);
     const ranges = [];
+    // skip start x-to-y line.
     let i = start + 1;
     // consume all range entries until an empty line is reached.
     while (i < lines.length && lines[i]) {
       ranges.push(parseDelimited(lines[i], " ", Number));
       i++;
     }
-    return [src, dest, ranges, i];
+    return [ranges, i];
   };
   // parse each x-to-y map.
   const parseMaps = (start) => {
-    const maps = new Map();
+    const maps = [];
     let i = start;
     while (i < lines.length) {
-      const [src, dest, ranges, newIndex] = parseMap(i);
-      maps.set(src, { dest, ranges: ranges.sort((a, b) => a[1] - b[1]) });
+      const [ranges, newIndex] = parseMap(i);
+      maps.push(ranges.sort((a, b) => a[1] - b[1]));
       i = newIndex + 1;
     }
     return maps;
@@ -82,16 +82,13 @@ const findRange = (x, ranges) => {
 /**
  * Maps a source value to a destination value.
  */
-const mapValue = (srcKey, srcValue, destKey, maps) => {
-  let currentKey = srcKey;
-  let currentValue = srcValue;
-  while (currentKey !== destKey) {
-    const { dest: newDest, ranges } = maps.get(currentKey);
-    const range = findRange(currentValue, ranges);
-    currentValue = range ? translate(currentValue, range) : currentValue;
-    currentKey = newDest;
+const mapValue = (value, maps) => {
+  let current = value;
+  for (let i = 0; i < maps.length; i++) {
+    const range = findRange(current, maps[i]);
+    current = range ? translate(current, range) : current;
   }
-  return currentValue;
+  return current;
 };
 
 /**
@@ -99,7 +96,7 @@ const mapValue = (srcKey, srcValue, destKey, maps) => {
  */
 export const levelOne = ({ lines }) => {
   const { seeds, maps } = parseAlmanac(lines);
-  return Math.min(...seeds.map((x) => mapValue("seed", x, "location", maps)));
+  return Math.min(...seeds.map((x) => mapValue(x, maps)));
 };
 
 /**
