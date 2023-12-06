@@ -7,6 +7,21 @@ import { parseDelimited } from "./util/string.js";
 import { pairs } from "./util/array.js";
 
 /**
+ * The dest start of the range.
+ */
+const dest = (range) => range[0];
+
+/**
+ * The source start of the range.
+ */
+const src = (range) => range[1];
+
+/**
+ * The length of a range.
+ */
+const len = (range) => range[2];
+
+/**
  * Parse the lines of the input and returns an almanac.
  */
 const parseAlmanac = (lines) => {
@@ -29,7 +44,7 @@ const parseAlmanac = (lines) => {
     while (i < lines.length) {
       const [ranges, newIndex] = parseMap(i);
       // sort ranges for binary search
-      maps.push(ranges.sort((a, b) => a[1] - b[1]));
+      maps.push(ranges.sort((a, b) => src(a) - src(b)));
       i = newIndex + 1;
     }
     return maps;
@@ -39,21 +54,6 @@ const parseAlmanac = (lines) => {
     maps: parseMaps(2),
   };
 };
-
-/**
- * The dest start of the range.
- */
-const dest = (range) => range[0];
-
-/**
- * The source start of the range.
- */
-const src = (range) => range[1];
-
-/**
- * The length of a range.
- */
-const len = (range) => range[2];
 
 /**
  * Translate a source x to the ranges dest x.
@@ -104,12 +104,11 @@ export const levelOne = ({ lines }) => {
  * Returns the solution for level two of this puzzle.
  */
 export const levelTwo = ({ lines }) => {
-  const { seeds, maps } = parseAlmanac(lines);
-  const seedRanges = pairs(seeds);
   let lowest = Number.MAX_SAFE_INTEGER;
-  for (const [seedStart, length] of seedRanges) {
-    const seedEnd = seedStart + length;
-    for (let seed = seedStart; seed < seedEnd; seed++) {
+  const { seeds, maps } = parseAlmanac(lines);
+  const seedRanges = pairs(seeds).map(([s, l]) => [s, s + l]);
+  for (const [start, end] of seedRanges) {
+    for (let seed = start; seed < end; seed++) {
       lowest = Math.min(mapValue(seed, maps), lowest);
     }
   }
