@@ -35,7 +35,7 @@ const parseAlmanac = (lines) => {
       ranges.push(parseDelimited(lines[i], " ", Number));
       i++;
     }
-    return [ranges, i];
+    return [ranges.sort((a, b) => a[1] - b[1]), i];
   };
   // parse each x-to-y map.
   const parseMaps = (start) => {
@@ -44,7 +44,7 @@ const parseAlmanac = (lines) => {
     while (i < lines.length) {
       const [ranges, newIndex] = parseMap(i);
       // sort ranges for binary search
-      maps.push(ranges.sort((a, b) => src(a) - src(b)));
+      maps.push(ranges);
       i = newIndex + 1;
     }
     return maps;
@@ -113,8 +113,8 @@ export const levelTwo = ({ lines }) => {
 };
 
 // const hit = [
-//   2165573804, 
-//   2147782144, 
+//   2165573804,
+//   2147782144,
 //   1921208416,
 //   1913168713,
 //   2138332329,
@@ -123,11 +123,11 @@ export const levelTwo = ({ lines }) => {
 // ];
 
 // const miss = [
-//   42419004, 
-//   60210664, 
-//   286784392, 
-//   294824095, 
-//   69660479, 
-//   89692642, 
+//   42419004,
+//   60210664,
+//   286784392,
+//   294824095,
+//   69660479,
+//   89692642,
 //   312034788,
 // ];
