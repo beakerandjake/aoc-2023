@@ -28,5 +28,5 @@ export const consume = (str, start, matchFn) => {
  * @param {(string) => any} mapFn
  * @returns {array}
  */
-export const parseDelimited = (str, delimiter, mapFn) =>
+export const parseDelimited = (str, delimiter, mapFn = (x) => x) =>
   str.split(delimiter).map(mapFn);
