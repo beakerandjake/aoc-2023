@@ -4,7 +4,41 @@
  */
 
 import { parseDelimited } from "./util/string.js";
-import { pairs } from "./util/array.js";
+import { pairs, binarySearch } from "./util/array.js";
+
+/**
+ * Parse the lines of the input and returns an almanac.
+ */
+const parseAlmanac = (lines) => {
+  // parse a x-to-y map and its entries.
+  const parseMap = (start) => {
+    const ranges = [];
+    // skip start x-to-y line.
+    let i = start + 1;
+    // consume all range entries until an empty line is reached.
+    while (i < lines.length && lines[i]) {
+      ranges.push(parseDelimited(lines[i], " ", Number));
+      i++;
+    }
+    // sort ranges for binary search
+    return [ranges.sort((a, b) => a[1] - b[1]), i];
+  };
+  // parse each x-to-y map.
+  const parseMaps = (start) => {
+    const maps = [];
+    let i = start;
+    while (i < lines.length) {
+      const [ranges, newIndex] = parseMap(i);
+      maps.push(ranges);
+      i = newIndex + 1;
+    }
+    return maps;
+  };
+  return {
+    seeds: parseDelimited(lines[0].split(":")[1].trim(), " ", Number),
+    maps: parseMaps(2),
+  };
+};
 
 /**
  * The dest start of the range.
@@ -22,71 +56,24 @@ const src = (range) => range[1];
 const len = (range) => range[2];
 
 /**
- * Parse the lines of the input and returns an almanac.
- */
-const parseAlmanac = (lines) => {
-  // parse a x-to-y map and its entries.
-  const parseMap = (start) => {
-    const ranges = [];
-    // skip start x-to-y line.
-    let i = start + 1;
-    // consume all range entries until an empty line is reached.
-    while (i < lines.length && lines[i]) {
-      ranges.push(parseDelimited(lines[i], " ", Number));
-      i++;
-    }
-    return [ranges.sort((a, b) => a[1] - b[1]), i];
-  };
-  // parse each x-to-y map.
-  const parseMaps = (start) => {
-    const maps = [];
-    let i = start;
-    while (i < lines.length) {
-      const [ranges, newIndex] = parseMap(i);
-      // sort ranges for binary search
-      maps.push(ranges);
-      i = newIndex + 1;
-    }
-    return maps;
-  };
-  return {
-    seeds: parseDelimited(lines[0].split(":")[1].trim(), " ", Number),
-    maps: parseMaps(2),
-  };
-};
-
-/**
  * Translate a source x to the ranges dest x.
  */
 const translate = (x, range) => x - src(range) + dest(range);
-
-/**
- * Returns the first range which covers value x.
- */
-const findRange = (x, ranges) => {
-  let l = 0;
-  let u = ranges.length - 1;
-  while (l <= u) {
-    const m = (l + u) >> 1;
-    const r = ranges[m];
-    if (x < src(r)) {
-      u = m - 1;
-    } else if (x >= src(r) + len(r)) {
-      l = m + 1;
-    } else {
-      return r;
-    }
-  }
-  return null;
-};
 
 /**
  * Maps a source value to a destination value.
  */
 const mapValue = (value, maps) =>
   maps.reduce((current, ranges) => {
-    const range = findRange(current, ranges);
-    return range ? translate(current, range) : current;
+    const range = binarySearch(ranges, (r) => {
+      if (current < src(r)) {
+        return -1;
+      } else if (current > src(r) + len(r)) {
+        return 1;
+      }
+      return 0;
+    });
+    return range >= 0 ? translate(current, ranges[range]) : current;
   }, value);
 
 /**

@@ -33,3 +33,29 @@ export const pairs = (array) =>
     (acc, _, i) => (i % 2 === 0 ? [...acc, array.slice(i, i + 2)] : acc),
     []
   );
+
+/**
+ * Searches the array for a value and returns if found.
+ * @param {Array} arr
+ * @param {(any) => number} compareFn - Function used to compare items.
+ *    Expected to return:
+ *      - Less than 1 if search value is less than current item
+ *      - Greater than 1 if search value is greater than item
+ *      - Zero if search value is equal to item.
+ */
+export const binarySearch = (arr, compareFn) => {
+  let l = 0;
+  let u = arr.length - 1;
+  while (l <= u) {
+    const m = (l + u) >> 1;
+    const comp = compareFn(arr[m]);
+    if (comp < 0) {
+      u = m - 1;
+    } else if (comp > 0) {
+      l = m + 1;
+    } else {
+      return m;
+    }
+  }
+  return -1;
+};
