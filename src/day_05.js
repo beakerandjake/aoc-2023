@@ -93,26 +93,23 @@ export const levelOne = ({ lines }) => {
 };
 
 /**
- * Does [x1,x2] overlap [y1,y2]
- */
-const overlaps = (x1, x2, y1, y2) => x1 < y2 && y1 < x2;
-
-/**
  * Finds an overlapping range in the map (if any).
  * Returns the range and the amount of overlap.
  */
 const findRangeOverlap = (srcStart, srcEnd, ranges) => {
-  // todo faster than linear search.
-  const range = ranges.find((r) => overlaps(srcStart, srcEnd, r.start, r.end));
+  const rangeIndex = binarySearch(ranges, (r) => r.compare(srcStart));
 
   /**
    * no overlapping range, return full src range
    *  x1-----x2                           x1-----x2
    *             y1----y2  or  y1----y2
    */
-  if (!range) {
+  if (rangeIndex < 0) {
     return { range: null, width: srcEnd - srcStart };
   }
+
+  const range = ranges[rangeIndex];
+
   /**
    * overlapping range starts after srcStart, truncate src range to [x1,y1].
    *  x1-------------x2
