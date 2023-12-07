@@ -120,34 +120,6 @@ export const levelOne = ({ lines }) => {
   return Math.min(...seeds.map((x) => mapValue(x, maps)));
 };
 
-const futureRange = (start, length, map) => {
-  // find the map range that covers the future range.
-  const rangeIndex = map.findRange(start);
-  // found a map range that covers some or all of range.
-  if (rangeIndex >= 0) {
-    const range = map.ranges[rangeIndex];
-    return {
-      range,
-      length: start + length < range.end ? length : range.end - start,
-    };
-  }
-  // no map range found, get index of *next upcoming* map range (sorted by range start)
-  const nextRangeIndex = Math.abs(rangeIndex) - 1;
-  // no map ranges upcoming
-  if (nextRangeIndex === map.ranges.length) {
-    return { range: null, length };
-  }
-  // range does not cross upcoming map range.
-  if (start + length < map.ranges[nextRangeIndex].start) {
-    return { range: null, length };
-  }
-  // range crosses into upcoming map range.
-  return {
-    range: map.ranges[nextRangeIndex],
-    length: map.ranges[nextRangeIndex].start - start,
-  };
-};
-
 /**
  * Does [x1,x2] overlap [y1,y2]
  */
@@ -197,97 +169,40 @@ const findRangeOverlap = (srcStart, srcEnd, map) => {
   return { range, length: srcEnd - srcStart };
 };
 
+const createPipe = (srcStart, srcEnd, maps) => {
+  const pipes = [];
+  let start = srcStart;
+  let end = srcEnd;
+  for (const map of maps) {
+    const pipe = findRangeOverlap(start, end, map);
+    start = pipe.range ? pipe.range.translate(start) : start;
+    end = start + pipe.length;
+    pipes.push(pipe);
+  }
+  return pipes;
+};
+
 /**
  * Returns the solution for level two of this puzzle.
  */
 export const levelTwo = ({ lines }) => {
-  console.log();
-  const { maps } = parseAlmanac(lines);
-  // console.log(maps.map((x) => x.ranges));
-
-  const newStart = (range, orig) => (range ? range.translate(orig) : orig);
-
-  // const seed = [79, 79 + 14];
-  // let srcStart = 79;
-  // let srcEnd = 79 + 14;
-
-  // const seedToSoil = findRangeOverlap(srcStart, srcEnd, maps[0]);
-  // srcStart = newStart(seedToSoil.range, srcStart);
-  // srcEnd = srcStart + seedToSoil.length;
-  // console.log(seedToSoil);
-  // console.log(srcStart, srcEnd);
-
-  // const soilToFertilizer = findRangeOverlap(srcStart, srcEnd, maps[1]);
-  // srcStart = newStart(soilToFertilizer.range, srcStart);
-  // srcEnd = srcStart + soilToFertilizer.length;
-  // console.log(soilToFertilizer);
-  // console.log(srcStart, srcEnd);
-
-  // const fertilizerToWater = findRangeOverlap(srcStart, srcEnd, maps[2]);
-  // srcStart = newStart(fertilizerToWater.range, srcStart);
-  // srcEnd = srcStart + fertilizerToWater.length;
-  // console.log(fertilizerToWater);
-  // console.log(srcStart, srcEnd);
-
-  // const waterToLight = findRangeOverlap(srcStart, srcEnd, maps[3]);
-  // srcStart = newStart(waterToLight.range, srcStart);
-  // srcEnd = srcStart + waterToLight.length;
-  // console.log(waterToLight);
-  // console.log(srcStart, srcEnd);
-
-  // const lightToTemperature = findRangeOverlap(srcStart, srcEnd, maps[4]);
-  // srcStart = newStart(lightToTemperature.range, srcStart);
-  // srcEnd = srcStart + lightToTemperature.length;
-  // console.log(lightToTemperature);
-  // console.log(srcStart, srcEnd);
-
-  // const temperatureToHumidity = findRangeOverlap(srcStart, srcEnd, maps[4]);
-  // srcStart = newStart(temperatureToHumidity.range, srcStart);
-  // srcEnd = srcStart + temperatureToHumidity.length;
-  // console.log(temperatureToHumidity);
-  // console.log(srcStart, srcEnd);
-
-  // const humidityToLocation = findRangeOverlap(srcStart, srcEnd, maps[4]);
-  // srcStart = newStart(humidityToLocation.range, srcStart);
-  // srcEnd = srcStart + humidityToLocation.length;
-  // console.log(humidityToLocation);
-  // console.log(srcStart, srcEnd);
-
   let min = Number.MAX_SAFE_INTEGER;
-  const seedStart = 79;
-  const seedEnd = seedStart + 14;
-  let srcStart = seedStart;
-  let srcEnd = seedEnd;
-
-  let skipCount = seedEnd - seedStart;
-  console.log("before", skipCount);
-  for (const map of maps) {
-    const { range, length } = findRangeOverlap(srcStart, srcEnd, map);
-    srcStart = newStart(range, srcStart);
-    srcEnd = srcStart + length;
-    skipCount = Math.min(skipCount, length);
+  const { seeds, maps } = parseAlmanac(lines);
+  const seedRanges = pairs(seeds);
+  for (const [seedStart, seedLength] of seedRanges) {
+    let start = seedStart;
+    const end = seedStart + seedLength;
+    let remaining = seedLength;
+    while (remaining > 0) {
+      const pipe = createPipe(start, end, maps);
+      const skipCount = Math.max(
+        1,
+        Math.min(...pipe.map(({ length }) => length))
+      );
+      min = Math.min(min, mapValue(start, maps));
+      remaining -= skipCount;
+      start += skipCount;
+    }
   }
-  console.log("after", skipCount);
-
-  // let minDest = Number.MAX_SAFE_INTEGER;
-  // let minI = Number.MAX_SAFE_INTEGER;
-  // const vals = [];
-  // for (let i = 0; i < skipCount; i++) {
-  //   const val = mapValue(i + seedStart, maps);
-  //   if (val < minDest) {
-  //     minDest = val;
-  //     minI = i;
-  //   }
-  //   vals.push(val);
-  // }
-  // console.log(
-  //   "minI",
-  //   minI,
-  //   "minDest",
-  //   minDest,
-  //   "plus1",
-  //   mapValue(seedStart + skipCount + 1, maps)
-  // );
-
-  return 1234;
+  return min;
 };
