@@ -95,7 +95,7 @@ export const levelOne = ({ lines }) => {
   // translate the seed position by running it through the almanacs maps.
   const seedPosition = (x) =>
     maps.reduce((current, ranges) => {
-      const index = binarySearch(ranges, (r) => rCompare(current, r));
+      const index = binarySearch(ranges, current, rCompare);
       return index >= 0 ? rTranslate(current, ranges[index]) : current;
     }, x);
 
@@ -110,7 +110,7 @@ export const levelTwo = ({ lines }) => {
 
   // find an overlapping map range (if any) and the amount of overlap.
   const findRangeOverlap = (start, end, ranges) => {
-    const rangeIndex = binarySearch(ranges, (r) => rCompare(start, r));
+    const rangeIndex = binarySearch(ranges, start, rCompare);
 
     /**
      * no overlapping range, return full src range
@@ -168,17 +168,17 @@ export const levelTwo = ({ lines }) => {
   let answer = Number.MAX_SAFE_INTEGER;
   const seedRanges = pairs(seeds);
   for (const [from, length] of seedRanges) {
-    let start = from;
-    const end = from + length;
+    let seedStart = from;
+    const seedEnd = from + length;
     let remaining = length;
     while (remaining) {
-      const pipe = createPipe(start, end, maps);
+      const pipe = createPipe(seedStart, seedEnd, maps);
+      answer = Math.min(answer, executePipe(seedStart, pipe));
       // all seed values that fit in this pipe will be increasing
       // so if we know the value of the start we can skip the rest.
       const skipCount = Math.min(...pipe.map(({ width }) => width));
-      answer = Math.min(answer, executePipe(start, pipe));
       remaining -= skipCount;
-      start += skipCount;
+      seedStart += skipCount;
     }
   }
   return answer;
