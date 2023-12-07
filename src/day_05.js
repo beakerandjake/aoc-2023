@@ -204,9 +204,54 @@ export const levelTwo = ({ lines }) => {
   console.log();
   const { maps } = parseAlmanac(lines);
   console.log(maps.map((x) => x.ranges));
-  for (let i = 0; i < 110; i++) {
-    console.log(i, findRangeOverlap(i, i + 6, maps[0]));
-  }
+
+  const newStart = (range, orig) => (range ? range.translate(orig) : orig);
+
+  const seed = [79, 79 + 14];
+  let srcStart = 79;
+  let srcEnd = 79 + 14;
+
+  const seedToSoil = findRangeOverlap(srcStart, srcEnd, maps[0]);
+  srcStart = newStart(seedToSoil.range, srcStart);
+  srcEnd = srcStart + seedToSoil.length;
+  console.log(seedToSoil);
+  console.log(srcStart, srcEnd);
+
+  const soilToFertilizer = findRangeOverlap(srcStart, srcEnd, maps[1]);
+  srcStart = newStart(soilToFertilizer.range, srcStart);
+  srcEnd = srcStart + soilToFertilizer.length;
+  console.log(soilToFertilizer);
+  console.log(srcStart, srcEnd);
+
+  const fertilizerToWater = findRangeOverlap(srcStart, srcEnd, maps[2]);
+  srcStart = newStart(fertilizerToWater.range, srcStart);
+  srcEnd = srcStart + fertilizerToWater.length;
+  console.log(fertilizerToWater);
+  console.log(srcStart, srcEnd);
+
+  const waterToLight = findRangeOverlap(srcStart, srcEnd, maps[3]);
+  srcStart = newStart(waterToLight.range, srcStart);
+  srcEnd = srcStart + waterToLight.length;
+  console.log(waterToLight);
+  console.log(srcStart, srcEnd);
+
+  const lightToTemperature = findRangeOverlap(srcStart, srcEnd, maps[4]);
+  srcStart = newStart(lightToTemperature.range, srcStart);
+  srcEnd = srcStart + lightToTemperature.length;
+  console.log(lightToTemperature);
+  console.log(srcStart, srcEnd);
+
+  const temperatureToHumidity = findRangeOverlap(srcStart, srcEnd, maps[4]);
+  srcStart = newStart(temperatureToHumidity.range, srcStart);
+  srcEnd = srcStart + temperatureToHumidity.length;
+  console.log(temperatureToHumidity);
+  console.log(srcStart, srcEnd);
+
+  const humidityToLocation = findRangeOverlap(srcStart, srcEnd, maps[4]);
+  srcStart = newStart(humidityToLocation.range, srcStart);
+  srcEnd = srcStart + humidityToLocation.length;
+  console.log(humidityToLocation);
+  console.log(srcStart, srcEnd);
 
   return 1234;
 };
