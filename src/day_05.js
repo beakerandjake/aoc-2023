@@ -6,6 +6,19 @@
 import { parseDelimited } from "./util/string.js";
 import { pairs, binarySearch } from "./util/array.js";
 
+const rDest = (range) => range[0];
+const rStart = (range) => range[1];
+const rEnd = (range) => range[2];
+const rTranslate = (x, r) => x - rStart(r) + rDest(r);
+const rCompare = (x, r) => {
+  if (x < rStart(r)) {
+    return -1;
+  } else if (x >= rEnd(r)) {
+    return 1;
+  }
+  return 0;
+};
+
 class MapRange {
   constructor(dest, start, end) {
     this.start = start;
@@ -55,8 +68,8 @@ const parseAlmanac = (lines) => {
     let i = start + 1;
     // consume all range entries until an empty line is reached.
     while (i < lines.length && lines[i]) {
-      const [dest, src, length] = parseDelimited(lines[i], " ", Number);
-      ranges.push(new MapRange(dest, src, src + length));
+      const range = parseDelimited(lines[i], " ", Number);
+      ranges.push(new MapRange(range[0], range[1], range[1] + range[2]));
       i++;
     }
     return [ranges, i];
@@ -96,8 +109,8 @@ export const levelOne = ({ lines }) => {
  * Finds an overlapping range in the map (if any).
  * Returns the range and the amount of overlap.
  */
-const findRangeOverlap = (srcStart, srcEnd, ranges) => {
-  const rangeIndex = binarySearch(ranges, (r) => r.compare(srcStart));
+const findRangeOverlap = (start, end, ranges) => {
+  const rangeIndex = binarySearch(ranges, (r) => r.compare(start));
 
   /**
    * no overlapping range, return full src range
@@ -105,7 +118,7 @@ const findRangeOverlap = (srcStart, srcEnd, ranges) => {
    *             y1----y2  or  y1----y2
    */
   if (rangeIndex < 0) {
-    return { range: null, width: srcEnd - srcStart };
+    return { range: null, width: end - start };
   }
 
   const range = ranges[rangeIndex];
@@ -115,8 +128,8 @@ const findRangeOverlap = (srcStart, srcEnd, ranges) => {
    *  x1-------------x2
    *        y1------------y2
    */
-  if (srcStart < range.start) {
-    return { range, width: range.start - srcStart };
+  if (start < range.start) {
+    return { range, width: range.start - start };
   }
 
   /**
@@ -124,8 +137,8 @@ const findRangeOverlap = (srcStart, srcEnd, ranges) => {
    *        x1-------------x2
    *  y1------------y2
    */
-  if (srcStart >= range.start && srcEnd >= range.end) {
-    return { range, width: range.end - srcStart };
+  if (start >= range.start && end >= range.end) {
+    return { range, width: range.end - start };
   }
 
   /**
@@ -133,17 +146,17 @@ const findRangeOverlap = (srcStart, srcEnd, ranges) => {
    *      x1-----x2
    *  y1------------------y2
    */
-  return { range, width: srcEnd - srcStart };
+  return { range, width: end - start };
 };
 
 /**
  * Creates a "pipe" which is a vertical slice of ranges which can
  * translate the srcStart value to X where X is the width of the smallest pipe for this range.
  */
-const createPipe = (srcStart, srcEnd, maps) => {
+const createPipe = (seedStart, seedEnd, maps) => {
   const pipes = [];
-  let start = srcStart;
-  let end = srcEnd;
+  let start = seedStart;
+  let end = seedEnd;
   for (const map of maps) {
     const pipe = findRangeOverlap(start, end, map.ranges);
     start = pipe.range ? pipe.range.translate(start) : start;
