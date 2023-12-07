@@ -153,10 +153,13 @@ const createPipe = (srcStart, srcEnd, maps) => {
   return pipes;
 };
 
-const executePipe = (value, pipe) =>
+/**
+ * Pass the seed through the pipe and return the position.
+ */
+const executePipe = (seed, pipe) =>
   pipe.reduce(
     (acc, { range }) => (range?.covers(acc) ? range.translate(acc) : acc),
-    value
+    seed
   );
 
 /**
