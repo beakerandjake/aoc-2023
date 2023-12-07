@@ -61,3 +61,16 @@ export const binarySearch = (arr, item, compareFn) => {
   }
   return ~l;
 };
+
+/**
+ * Creates an array of grouped elements, the first of which contains the first elements of the given arrays, the second of which contains the second elements of the given arrays, and so on.
+ * @param {...Array}
+ */
+export const zip = (...arrays) => {
+  const toReturn = [];
+  const maxLength = Math.max(...arrays.map((arr) => arr.length));
+  for (let col = 0; col < maxLength; col++) {
+    toReturn.push(arrays.map((arr) => arr[col]));
+  }
+  return toReturn;
+};
