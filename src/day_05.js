@@ -7,9 +7,9 @@ import { parseDelimited } from "./util/string.js";
 import { pairs, binarySearch } from "./util/array.js";
 
 class MapRange {
-  constructor([dest, start, length]) {
+  constructor(dest, start, end) {
     this.start = start;
-    this.end = start + length;
+    this.end = end;
     this.dest = dest;
   }
 
@@ -29,47 +29,18 @@ class MapRange {
     }
     return 0;
   }
-
-  toString() {
-    return `{ start: ${this.start}, end: ${this.end} }`;
-  }
 }
 
 class Map {
   constructor(ranges) {
     // sort ranges for binary search.
     this.ranges = ranges.sort((a, b) => a.start - b.start);
-    this.cachedRange = null;
-    this.coveredRanges = this.#compressRanges();
-  }
-
-  #compressRanges() {
-    const compressed = [];
-    let [{ start, end }] = this.ranges;
-    for (let i = 1; i < this.ranges.length; i++) {
-      if (end >= this.ranges[i].start) {
-        end = this.ranges[i].end;
-      } else {
-        compressed.push([start, end]);
-        start = this.ranges[i].start;
-        end = this.ranges[i].end;
-      }
-    }
-    compressed.push([start, end]);
-    return compressed;
-  }
-
-  findRange(x) {
-    return binarySearch(this.ranges, (r) => r.compare(x));
   }
 
   translate(x) {
     // assume that a recently used range will likely be used again.
-    if (!this.cachedRange || !this.cachedRange.covers(x)) {
-      const index = this.findRange(x);
-      this.cachedRange = index >= 0 ? this.ranges[index] : null;
-    }
-    return this.cachedRange ? this.cachedRange.translate(x) : x;
+    const index = binarySearch(this.ranges, (r) => r.compare(x));
+    return index >= 0 ? this.ranges[index].translate(x) : x;
   }
 }
 
@@ -84,7 +55,8 @@ const parseAlmanac = (lines) => {
     let i = start + 1;
     // consume all range entries until an empty line is reached.
     while (i < lines.length && lines[i]) {
-      ranges.push(new MapRange(parseDelimited(lines[i], " ", Number)));
+      const [dest, src, length] = parseDelimited(lines[i], " ", Number);
+      ranges.push(new MapRange(dest, src, src + length));
       i++;
     }
     return [ranges, i];
@@ -129,11 +101,9 @@ const overlaps = (x1, x2, y1, y2) => x1 < y2 && y1 < x2;
  * Finds an overlapping range in the map (if any).
  * Returns the range and the amount of overlap.
  */
-const findRangeOverlap = (srcStart, srcEnd, map) => {
+const findRangeOverlap = (srcStart, srcEnd, ranges) => {
   // todo faster than linear search.
-  const range = map.ranges.find((r) =>
-    overlaps(srcStart, srcEnd, r.start, r.end)
-  );
+  const range = ranges.find((r) => overlaps(srcStart, srcEnd, r.start, r.end));
 
   /**
    * no overlapping range, return full src range
@@ -174,13 +144,19 @@ const createPipe = (srcStart, srcEnd, maps) => {
   let start = srcStart;
   let end = srcEnd;
   for (const map of maps) {
-    const pipe = findRangeOverlap(start, end, map);
+    const pipe = findRangeOverlap(start, end, map.ranges);
     start = pipe.range ? pipe.range.translate(start) : start;
     end = start + pipe.length;
     pipes.push(pipe);
   }
   return pipes;
 };
+
+const executePipe = (value, pipe) =>
+  pipe.reduce(
+    (acc, { range }) => (range?.covers(acc) ? range.translate(acc) : acc),
+    value
+  );
 
 /**
  * Returns the solution for level two of this puzzle.
@@ -195,11 +171,8 @@ export const levelTwo = ({ lines }) => {
     let remaining = seedLength;
     while (remaining > 0) {
       const pipe = createPipe(start, end, maps);
-      const skipCount = Math.max(
-        1,
-        Math.min(...pipe.map(({ length }) => length))
-      );
-      min = Math.min(min, mapValue(start, maps));
+      const skipCount = Math.min(...pipe.map(({ length }) => length));
+      min = Math.min(min, executePipe(start, pipe));
       remaining -= skipCount;
       start += skipCount;
     }
