@@ -111,24 +111,24 @@ const findRangeOverlap = (srcStart, srcEnd, ranges) => {
    *             y1----y2  or  y1----y2
    */
   if (!range) {
-    return { range: null, length: srcEnd - srcStart };
+    return { range: null, width: srcEnd - srcStart };
   }
   /**
-   * overlapping range starts after srcStart, truncate src range.
+   * overlapping range starts after srcStart, truncate src range to [x1,y1].
    *  x1-------------x2
    *        y1------------y2
    */
   if (srcStart < range.start) {
-    return { range, length: range.start - srcStart };
+    return { range, width: range.start - srcStart };
   }
 
   /**
-   * overlapping range starts before srcStart, truncate src range.
+   * overlapping range starts before srcStart, truncate src range to [x1,y2].
    *        x1-------------x2
    *  y1------------y2
    */
   if (srcStart >= range.start && srcEnd >= range.end) {
-    return { range, length: range.end - srcStart };
+    return { range, width: range.end - srcStart };
   }
 
   /**
@@ -136,9 +136,13 @@ const findRangeOverlap = (srcStart, srcEnd, ranges) => {
    *      x1-----x2
    *  y1------------------y2
    */
-  return { range, length: srcEnd - srcStart };
+  return { range, width: srcEnd - srcStart };
 };
 
+/**
+ * Creates a "pipe" which is a vertical slice of ranges which can
+ * translate the srcStart value to X where X is the width of the smallest pipe for this range.
+ */
 const createPipe = (srcStart, srcEnd, maps) => {
   const pipes = [];
   let start = srcStart;
@@ -146,7 +150,7 @@ const createPipe = (srcStart, srcEnd, maps) => {
   for (const map of maps) {
     const pipe = findRangeOverlap(start, end, map.ranges);
     start = pipe.range ? pipe.range.translate(start) : start;
-    end = start + pipe.length;
+    end = start + pipe.width;
     pipes.push(pipe);
   }
   return pipes;
@@ -171,7 +175,7 @@ export const levelTwo = ({ lines }) => {
     let remaining = seedLength;
     while (remaining > 0) {
       const pipe = createPipe(start, end, maps);
-      const skipCount = Math.min(...pipe.map(({ length }) => length));
+      const skipCount = Math.min(...pipe.map(({ width }) => width));
       min = Math.min(min, executePipe(start, pipe));
       remaining -= skipCount;
       start += skipCount;
