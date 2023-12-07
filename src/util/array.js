@@ -39,8 +39,8 @@ export const pairs = (array) =>
  * @param {Array} arr
  * @param {(any) => number} compareFn - Function used to compare items.
  *    Expected to return:
- *      - Less than 1 if search value is less than current item
- *      - Greater than 1 if search value is greater than item
+ *      - Less than zero if search value is less than current item
+ *      - Greater than zero if search value is greater than item
  *      - Zero if search value is equal to item.
  * @returns {number} The index of the item (if found), otherwise (-(insertion point) -1)
  */
