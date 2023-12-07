@@ -29,6 +29,10 @@ class MapRange {
     }
     return 0;
   }
+
+  toString() {
+    return `{ start: ${this.start}, end: ${this.end} }`;
+  }
 }
 
 class Map {
@@ -36,13 +40,34 @@ class Map {
     // sort ranges for binary search.
     this.ranges = ranges.sort((a, b) => a.start - b.start);
     this.cachedRange = null;
+    this.coveredRanges = this.#compressRanges();
+  }
+
+  #compressRanges() {
+    const compressed = [];
+    let [{ start, end }] = this.ranges;
+    for (let i = 1; i < this.ranges.length; i++) {
+      if (end >= this.ranges[i].start) {
+        end = this.ranges[i].end;
+      } else {
+        compressed.push([start, end]);
+        start = this.ranges[i].start;
+        end = this.ranges[i].end;
+      }
+    }
+    compressed.push([start, end]);
+    return compressed;
+  }
+
+  findRange(x) {
+    return binarySearch(this.ranges, (r) => r.compare(x));
   }
 
   translate(x) {
     // assume that a recently used range will likely be used again.
     if (!this.cachedRange || !this.cachedRange.covers(x)) {
-      const range = binarySearch(this.ranges, (r) => r.compare(x));
-      this.cachedRange = range >= 0 ? this.ranges[range] : null;
+      const index = this.findRange(x);
+      this.cachedRange = index >= 0 ? this.ranges[index] : null;
     }
     return this.cachedRange ? this.cachedRange.translate(x) : x;
   }
@@ -95,37 +120,93 @@ export const levelOne = ({ lines }) => {
   return Math.min(...seeds.map((x) => mapValue(x, maps)));
 };
 
+const futureRange = (start, length, map) => {
+  // find the map range that covers the future range.
+  const rangeIndex = map.findRange(start);
+  // found a map range that covers some or all of range.
+  if (rangeIndex >= 0) {
+    const range = map.ranges[rangeIndex];
+    return {
+      range,
+      length: start + length < range.end ? length : range.end - start,
+    };
+  }
+  // no map range found, get index of *next upcoming* map range (sorted by range start)
+  const nextRangeIndex = Math.abs(rangeIndex) - 1;
+  // no map ranges upcoming
+  if (nextRangeIndex === map.ranges.length) {
+    return { range: null, length };
+  }
+  // range does not cross upcoming map range.
+  if (start + length < map.ranges[nextRangeIndex].start) {
+    return { range: null, length };
+  }
+  // range crosses into upcoming map range.
+  return {
+    range: map.ranges[nextRangeIndex],
+    length: map.ranges[nextRangeIndex].start - start,
+  };
+};
+
+/**
+ * Does [x1,x2] overlap [y1,y2]
+ */
+const overlaps = (x1, x2, y1, y2) => x1 < y2 && y1 < x2;
+
+/**
+ * Finds an overlapping range in the map (if any).
+ * Returns the range and the amount of overlap.
+ */
+const findRangeOverlap = (srcStart, srcEnd, map) => {
+  // todo faster than linear search.
+  const range = map.ranges.find((r) =>
+    overlaps(srcStart, srcEnd, r.start, r.end)
+  );
+
+  /**
+   * no overlapping range, return full src range
+   *  x1-----x2                           x1-----x2
+   *             y1----y2  or  y1----y2
+   */
+  if (!range) {
+    return { range: null, length: srcEnd - srcStart };
+  }
+  /**
+   * overlapping range starts after srcStart, truncate src range.
+   *  x1-------------x2
+   *        y1------------y2
+   */
+  if (srcStart < range.start) {
+    return { range, length: range.start - srcStart };
+  }
+
+  /**
+   * overlapping range starts before srcStart, truncate src range.
+   *        x1-------------x2
+   *  y1------------y2
+   */
+  if (srcStart >= range.start && srcEnd >= range.end) {
+    return { range, length: range.end - srcStart };
+  }
+
+  /**
+   * overlapping range contains src range, return full src range.
+   *      x1-----x2
+   *  y1------------------y2
+   */
+  return { range, length: srcEnd - srcStart };
+};
+
 /**
  * Returns the solution for level two of this puzzle.
  */
 export const levelTwo = ({ lines }) => {
-  let lowest = Number.MAX_SAFE_INTEGER;
-  const { seeds, maps } = parseAlmanac(lines);
-  const seedRanges = pairs(seeds).map(([s, l]) => [s, s + l]);
-  for (const [start, end] of seedRanges) {
-    for (let seed = start; seed < end; seed++) {
-      lowest = Math.min(mapValue(seed, maps), lowest);
-    }
+  console.log();
+  const { maps } = parseAlmanac(lines);
+  console.log(maps.map((x) => x.ranges));
+  for (let i = 0; i < 110; i++) {
+    console.log(i, findRangeOverlap(i, i + 6, maps[0]));
   }
-  return lowest;
+
+  return 1234;
 };
-
-// const hit = [
-//   2165573804,
-//   2147782144,
-//   1921208416,
-//   1913168713,
-//   2138332329,
-//   2118300166,
-//   1895958020,
-// ];
-
-// const miss = [
-//   42419004,
-//   60210664,
-//   286784392,
-//   294824095,
-//   69660479,
-//   89692642,
-//   312034788,
-// ];
