@@ -42,6 +42,7 @@ export const pairs = (array) =>
  *      - Less than 1 if search value is less than current item
  *      - Greater than 1 if search value is greater than item
  *      - Zero if search value is equal to item.
+ * @returns {number} The index of the item (if found), otherwise (-(insertion point) -1)
  */
 export const binarySearch = (arr, compareFn) => {
   let l = 0;
@@ -57,5 +58,5 @@ export const binarySearch = (arr, compareFn) => {
       return m;
     }
   }
-  return -1;
+  return ~l;
 };
