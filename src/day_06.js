@@ -7,21 +7,18 @@ import { product, zip } from "./util/array.js";
 import { parseDelimited } from "./util/string.js";
 
 /**
- * Parse the input and return the races.
+ * Parse the input and return info about the races.
  */
-const parseRaces = (lines) => {
-  const values = (line) =>
-    parseDelimited(line.split(":")[1].trim(), /\s+/, Number);
-  return zip(values(lines[0]), values(lines[1]));
-};
+const parseRaces = (lines, parseFn) =>
+  zip(parseFn(lines[0]), parseFn(lines[1]));
 
 /**
- * Count the number of ways to beat the record time in the race.
+ * Count the number of ways to beat the record time in a race.
  */
 const waysToWin = ([raceTime, record]) => {
   let count = 0;
-  for (let t = 1; t <= raceTime; t++) {
-    if (t * (raceTime - t) > record) {
+  for (let pressTime = 1; pressTime <= raceTime; pressTime++) {
+    if (pressTime * (raceTime - pressTime) > record) {
       count++;
     }
   }
@@ -29,14 +26,21 @@ const waysToWin = ([raceTime, record]) => {
 };
 
 /**
+ * Returns the produce of the number of ways to win the races described by the input.
+ */
+const solve = (lines, lineParseFn) =>
+  product(parseRaces(lines, lineParseFn).map(waysToWin));
+
+/**
  * Returns the solution for level one of this puzzle.
  */
 export const levelOne = ({ lines }) =>
-  product(parseRaces(lines).map(waysToWin));
+  solve(lines, (line) =>
+    parseDelimited(line.split(":")[1].trim(), /\s+/, Number)
+  );
 
 /**
  * Returns the solution for level two of this puzzle.
  */
-export const levelTwo = ({ input, lines }) => {
-  // your code here
-};
+export const levelTwo = ({ lines }) =>
+  solve(lines, (line) => [Number(line.split(":")[1].replaceAll(/\s+/g, ""))]);
