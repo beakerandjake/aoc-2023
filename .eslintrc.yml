@@ -21,13 +21,12 @@ rules:
   eqeqeq:
     - error
     - always
-    - 'null': ignore
+    - "null": ignore
   func-style:
     - error
     - expression
   guard-for-in: error
   logical-assignment-operators: error
-  multiline-comment-style: error
   new-cap: error
   no-array-constructor: error
   no-constant-binary-expression: error
@@ -71,7 +70,9 @@ rules:
   operator-assignment: error
   prefer-arrow-callback: error
   prefer-const: error
-  prefer-destructuring: error
+  prefer-destructuring:
+    - error
+    - object: false
   prefer-exponentiation-operator: error
   prefer-numeric-literals: error
   prefer-object-has-own: error
