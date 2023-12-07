@@ -203,55 +203,91 @@ const findRangeOverlap = (srcStart, srcEnd, map) => {
 export const levelTwo = ({ lines }) => {
   console.log();
   const { maps } = parseAlmanac(lines);
-  console.log(maps.map((x) => x.ranges));
+  // console.log(maps.map((x) => x.ranges));
 
   const newStart = (range, orig) => (range ? range.translate(orig) : orig);
 
-  const seed = [79, 79 + 14];
-  let srcStart = 79;
-  let srcEnd = 79 + 14;
+  // const seed = [79, 79 + 14];
+  // let srcStart = 79;
+  // let srcEnd = 79 + 14;
 
-  const seedToSoil = findRangeOverlap(srcStart, srcEnd, maps[0]);
-  srcStart = newStart(seedToSoil.range, srcStart);
-  srcEnd = srcStart + seedToSoil.length;
-  console.log(seedToSoil);
-  console.log(srcStart, srcEnd);
+  // const seedToSoil = findRangeOverlap(srcStart, srcEnd, maps[0]);
+  // srcStart = newStart(seedToSoil.range, srcStart);
+  // srcEnd = srcStart + seedToSoil.length;
+  // console.log(seedToSoil);
+  // console.log(srcStart, srcEnd);
 
-  const soilToFertilizer = findRangeOverlap(srcStart, srcEnd, maps[1]);
-  srcStart = newStart(soilToFertilizer.range, srcStart);
-  srcEnd = srcStart + soilToFertilizer.length;
-  console.log(soilToFertilizer);
-  console.log(srcStart, srcEnd);
+  // const soilToFertilizer = findRangeOverlap(srcStart, srcEnd, maps[1]);
+  // srcStart = newStart(soilToFertilizer.range, srcStart);
+  // srcEnd = srcStart + soilToFertilizer.length;
+  // console.log(soilToFertilizer);
+  // console.log(srcStart, srcEnd);
 
-  const fertilizerToWater = findRangeOverlap(srcStart, srcEnd, maps[2]);
-  srcStart = newStart(fertilizerToWater.range, srcStart);
-  srcEnd = srcStart + fertilizerToWater.length;
-  console.log(fertilizerToWater);
-  console.log(srcStart, srcEnd);
+  // const fertilizerToWater = findRangeOverlap(srcStart, srcEnd, maps[2]);
+  // srcStart = newStart(fertilizerToWater.range, srcStart);
+  // srcEnd = srcStart + fertilizerToWater.length;
+  // console.log(fertilizerToWater);
+  // console.log(srcStart, srcEnd);
 
-  const waterToLight = findRangeOverlap(srcStart, srcEnd, maps[3]);
-  srcStart = newStart(waterToLight.range, srcStart);
-  srcEnd = srcStart + waterToLight.length;
-  console.log(waterToLight);
-  console.log(srcStart, srcEnd);
+  // const waterToLight = findRangeOverlap(srcStart, srcEnd, maps[3]);
+  // srcStart = newStart(waterToLight.range, srcStart);
+  // srcEnd = srcStart + waterToLight.length;
+  // console.log(waterToLight);
+  // console.log(srcStart, srcEnd);
 
-  const lightToTemperature = findRangeOverlap(srcStart, srcEnd, maps[4]);
-  srcStart = newStart(lightToTemperature.range, srcStart);
-  srcEnd = srcStart + lightToTemperature.length;
-  console.log(lightToTemperature);
-  console.log(srcStart, srcEnd);
+  // const lightToTemperature = findRangeOverlap(srcStart, srcEnd, maps[4]);
+  // srcStart = newStart(lightToTemperature.range, srcStart);
+  // srcEnd = srcStart + lightToTemperature.length;
+  // console.log(lightToTemperature);
+  // console.log(srcStart, srcEnd);
 
-  const temperatureToHumidity = findRangeOverlap(srcStart, srcEnd, maps[4]);
-  srcStart = newStart(temperatureToHumidity.range, srcStart);
-  srcEnd = srcStart + temperatureToHumidity.length;
-  console.log(temperatureToHumidity);
-  console.log(srcStart, srcEnd);
+  // const temperatureToHumidity = findRangeOverlap(srcStart, srcEnd, maps[4]);
+  // srcStart = newStart(temperatureToHumidity.range, srcStart);
+  // srcEnd = srcStart + temperatureToHumidity.length;
+  // console.log(temperatureToHumidity);
+  // console.log(srcStart, srcEnd);
 
-  const humidityToLocation = findRangeOverlap(srcStart, srcEnd, maps[4]);
-  srcStart = newStart(humidityToLocation.range, srcStart);
-  srcEnd = srcStart + humidityToLocation.length;
-  console.log(humidityToLocation);
-  console.log(srcStart, srcEnd);
+  // const humidityToLocation = findRangeOverlap(srcStart, srcEnd, maps[4]);
+  // srcStart = newStart(humidityToLocation.range, srcStart);
+  // srcEnd = srcStart + humidityToLocation.length;
+  // console.log(humidityToLocation);
+  // console.log(srcStart, srcEnd);
+
+  let min = Number.MAX_SAFE_INTEGER;
+  const seedStart = 79;
+  const seedEnd = seedStart + 14;
+  let srcStart = seedStart;
+  let srcEnd = seedEnd;
+
+  let skipCount = seedEnd - seedStart;
+  console.log("before", skipCount);
+  for (const map of maps) {
+    const { range, length } = findRangeOverlap(srcStart, srcEnd, map);
+    srcStart = newStart(range, srcStart);
+    srcEnd = srcStart + length;
+    skipCount = Math.min(skipCount, length);
+  }
+  console.log("after", skipCount);
+
+  // let minDest = Number.MAX_SAFE_INTEGER;
+  // let minI = Number.MAX_SAFE_INTEGER;
+  // const vals = [];
+  // for (let i = 0; i < skipCount; i++) {
+  //   const val = mapValue(i + seedStart, maps);
+  //   if (val < minDest) {
+  //     minDest = val;
+  //     minI = i;
+  //   }
+  //   vals.push(val);
+  // }
+  // console.log(
+  //   "minI",
+  //   minI,
+  //   "minDest",
+  //   minDest,
+  //   "plus1",
+  //   mapValue(seedStart + skipCount + 1, maps)
+  // );
 
   return 1234;
 };
