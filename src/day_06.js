@@ -16,13 +16,15 @@ const parseRaces = (lines, parseFn) =>
  * Count the number of ways to beat the record time in a race.
  */
 const waysToWin = ([raceTime, record]) => {
-  let count = 0;
-  for (let pressTime = 1; pressTime <= raceTime; pressTime++) {
-    if (pressTime * (raceTime - pressTime) > record) {
-      count++;
-    }
+  // count losing results until first encounter with record.
+  let lessThanCount = 0;
+  let pressTime = 1;
+  while (pressTime * (raceTime - pressTime) < record) {
+    lessThanCount++;
+    pressTime++;
   }
-  return count;
+  // if results are curve, remove two losing ends of the curve.
+  return raceTime - lessThanCount * 2 - 1;
 };
 
 /**
