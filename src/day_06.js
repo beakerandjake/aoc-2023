@@ -23,7 +23,7 @@ const waysToWin = ([raceTime, record]) => {
     lessThanCount++;
     pressTime++;
   }
-  // if results are curve, remove two losing ends of the curve.
+  // race results are curve, remove two losing ends, this leaves us with number of ways to win.
   return raceTime - lessThanCount * 2 - 1;
 };
 
