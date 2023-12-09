@@ -30,3 +30,16 @@ export const consume = (str, start, matchFn) => {
  */
 export const parseDelimited = (str, delimiter, mapFn = (x) => x) =>
   str.split(delimiter).map(mapFn);
+
+/**
+ * Returns a map of each character to the number of times it appeared in the string.
+ * @param {string} str
+ * @returns {Map<string, number>}
+ */
+export const characterCounts = (str) => {
+  const counts = new Map();
+  for (const char of str) {
+    counts.set(char, (counts.get(char) || 0) + 1);
+  }
+  return counts;
+};
