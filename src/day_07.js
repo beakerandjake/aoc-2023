@@ -45,7 +45,7 @@ const bid = (hand) => hand[1];
 const totalWinnings = (hands, handScoreFn, cardStrengths) => {
   // map each hand to the score of its hand.
   const scores = hands.reduce(
-    (acc, hand) => acc.set(hand, handScoreFn(hand)),
+    (acc, hand) => acc.set(hand, handScoreFn(characterCounts(cards(hand)))),
     new Map()
   );
 
@@ -76,8 +76,7 @@ export const levelOne = ({ lines }) => {
   );
 
   // returns the score of the hand, higher is better.
-  const score = (hand) => {
-    const cardCounts = characterCounts(cards(hand));
+  const score = (cardCounts) => {
     switch (cardCounts.size) {
       case 1:
         // five of a kind.
