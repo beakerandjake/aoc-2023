@@ -112,7 +112,7 @@ export const levelTwo = ({ lines }) => {
           maxFace = face;
         }
       }
-      // use the joker cards to greedily increase the count of the card with highest count.
+      // use the joker cards to increase the count of the card with highest count.
       counts.set(maxFace, counts.get(maxFace) + counts.get("J"));
       counts.delete("J");
     }
