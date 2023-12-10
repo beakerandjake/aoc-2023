@@ -4,6 +4,7 @@
  */
 
 import { sum } from "./util/array.js";
+import { findKeyByValue } from "./util/map.js";
 import { characterCounts } from "./util/string.js";
 
 /**
@@ -51,7 +52,7 @@ const totalWinnings = (hands, countCardsFn, cardStrengths) => {
         return 50000;
       case 2:
         // four of a kind or full house.
-        return Math.max(...[...cardCounts.values()]) === 4 ? 41000 : 32100;
+        return Math.max(...[...cardCounts.values()]) === 4 ? 41000 : 32000;
       case 3:
         // three of a kind or two pair.
         return Math.max(...[...cardCounts.values()]) === 3 ? 31100 : 22100;
@@ -110,14 +111,26 @@ export const levelOne = ({ lines }) =>
  */
 export const levelTwo = ({ lines }) => {
   // modify card strengths so joker is weakest individual card.
-  const modifiedCardStrengths = { ...defaultCardStrengths, J: 0 };
+  const strengthsWithJoker = { ...defaultCardStrengths, J: 0 };
   // returns a modified card count using jokers to create the strongest hand type possible.
   const countCards = (cards) => {
-    const cardCounts = characterCounts(cards);
-    if (!cardCounts.has("J")) {
-      return cardCounts;
+    const counts = characterCounts(cards);
+    // no need to modify if no jokers in hand or hand of all jokers.
+    if (!counts.has("J") || (counts.has("J") && counts.size === 1)) {
+      return counts;
     }
-    return cardCounts;
+    const jokerCount = counts.get("J");
+    counts.delete("J");
+    let maxCount = 0;
+    let maxFace;
+    for (const [face, count] of counts.entries()) {
+      if (count > maxCount) {
+        maxCount = count;
+        maxFace = face;
+      }
+    }
+    counts.set(maxFace, counts.get(maxFace) + jokerCount);
+    return counts;
   };
-  return totalWinnings(lines.map(parseHand), countCards, modifiedCardStrengths);
+  return totalWinnings(lines.map(parseHand), countCards, strengthsWithJoker);
 };
