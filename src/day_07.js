@@ -9,21 +9,21 @@ import { characterCounts } from "./util/string.js";
 /**
  * The default strengths of each card face.
  */
-const defaultCardStrengths = [
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  "T",
-  "J",
-  "Q",
-  "K",
-  "A",
-].reduce((acc, x, i) => ({ ...acc, [x]: i }), {});
+const defaultCardStrengths = {
+  2: 1,
+  3: 2,
+  4: 3,
+  5: 4,
+  6: 5,
+  7: 6,
+  8: 7,
+  9: 8,
+  T: 9,
+  J: 10,
+  Q: 11,
+  K: 12,
+  A: 13,
+};
 
 /**
  * Parse a hand from a line of input.
@@ -108,6 +108,16 @@ export const levelOne = ({ lines }) =>
 /**
  * Returns the solution for level two of this puzzle.
  */
-export const levelTwo = ({ input, lines }) => {
-  // your code here
+export const levelTwo = ({ lines }) => {
+  // modify card strengths so joker is weakest individual card.
+  const modifiedCardStrengths = { ...defaultCardStrengths, J: 0 };
+  // returns a modified card count using jokers to create the strongest hand type possible.
+  const countCards = (cards) => {
+    const cardCounts = characterCounts(cards);
+    if (!cardCounts.has("J")) {
+      return cardCounts;
+    }
+    return cardCounts;
+  };
+  return totalWinnings(lines.map(parseHand), countCards, modifiedCardStrengths);
 };
