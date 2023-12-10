@@ -119,17 +119,18 @@ export const levelTwo = ({ lines }) => {
     if (!counts.has("J") || (counts.has("J") && counts.size === 1)) {
       return counts;
     }
-    const jokerCount = counts.get("J");
-    counts.delete("J");
     let maxCount = 0;
     let maxFace;
     for (const [face, count] of counts.entries()) {
-      if (count > maxCount) {
+      if (face !== "J" && count > maxCount) {
         maxCount = count;
         maxFace = face;
       }
     }
-    counts.set(maxFace, counts.get(maxFace) + jokerCount);
+    // use the joker cards to greedily increase the count of the face with highest card count.
+    counts.set(maxFace, counts.get(maxFace) + counts.get("J"));
+    counts.delete("J");
+
     return counts;
   };
   return totalWinnings(lines.map(parseHand), countCards, strengthsWithJoker);
