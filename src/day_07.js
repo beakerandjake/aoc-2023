@@ -4,7 +4,6 @@
  */
 
 import { sum } from "./util/array.js";
-import { findKeyByValue } from "./util/map.js";
 import { characterCounts } from "./util/string.js";
 
 /**
