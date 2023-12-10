@@ -34,34 +34,15 @@ const parseHand = (line) => {
 };
 
 /**
- * Compares the individual cards of two hands.
- * Returns < 0 if a is weaker than b.
- * Returns > 1 if a is stronger than b.
- * Returns zero if equal.
- */
-const highCard = (a, b, strengths) => {
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) {
-      return strengths[a[i]] - strengths[b[i]];
-    }
-  }
-  return 0;
-};
-
-/**
- * Returns the cards of the hand.
- */
-const cards = (hand) => hand[0];
-
-/**
- * Returns the bid of the hand.
- */
-const bid = (hand) => hand[1];
-
-/**
  * Calculates the total winnings of all hands.
  */
 const totalWinnings = (hands, countCardsFn, cardStrengths) => {
+  // return the cards of the hand.
+  const cards = (hand) => hand[0];
+
+  // returns the bid of the hand.
+  const bid = (hand) => hand[1];
+
   // returns the score of the hand, higher is better.
   const score = (cardCounts) => {
     switch (cardCounts.size) {
@@ -83,11 +64,24 @@ const totalWinnings = (hands, countCardsFn, cardStrengths) => {
     }
   };
 
-  // map each hand to the score of its hand.
+  // map each hand to its score.
   const scores = hands.reduce(
     (acc, hand) => acc.set(hand, score(countCardsFn(cards(hand)))),
     new Map()
   );
+
+  // compares the hands card by card.
+  // returns < 0 if a is weaker than b.
+  // returns > 0 if a is stronger than b.
+  // returns zero if a equals b.
+  const highCard = (a, b, strengths) => {
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) {
+        return strengths[a[i]] - strengths[b[i]];
+      }
+    }
+    return 0;
+  };
 
   // sort the hands by their score ascending.
   const sorted = [...hands].sort((a, b) => {
