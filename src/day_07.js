@@ -44,25 +44,13 @@ const totalWinnings = (hands, countCardsFn, cardStrengths) => {
   const bid = (hand) => hand[1];
 
   // returns the score of the hand, higher is better.
-  const score = (cardCounts) => {
-    switch (cardCounts.size) {
-      case 1:
-        // five of a kind.
-        return 50000;
-      case 2:
-        // four of a kind or full house.
-        return Math.max(...[...cardCounts.values()]) === 4 ? 41000 : 32000;
-      case 3:
-        // three of a kind or two pair.
-        return Math.max(...[...cardCounts.values()]) === 3 ? 31100 : 22100;
-      case 4:
-        // one pair
-        return 21110;
-      default:
-        // high card.
-        return 11111;
-    }
-  };
+  const score = (cardCounts) =>
+    Number(
+      [...cardCounts.values()]
+        .sort((a, b) => b - a)
+        .join("")
+        .padEnd(5, "0")
+    );
 
   // map each hand to its score.
   const scores = hands.reduce(
@@ -115,21 +103,19 @@ export const levelTwo = ({ lines }) => {
   const countCards = (cards) => {
     const counts = characterCounts(cards);
     // no need to modify if no jokers in hand or hand of all jokers.
-    if (!counts.has("J") || (counts.has("J") && counts.size === 1)) {
-      return counts;
-    }
-    let maxCount = 0;
-    let maxFace;
-    for (const [face, count] of counts.entries()) {
-      if (face !== "J" && count > maxCount) {
-        maxCount = count;
-        maxFace = face;
+    if (counts.has("J") && counts.size !== 1) {
+      let maxCount = 0;
+      let maxFace;
+      for (const [face, count] of counts.entries()) {
+        if (face !== "J" && count > maxCount) {
+          maxCount = count;
+          maxFace = face;
+        }
       }
+      // use the joker cards to greedily increase the count of the card with highest count.
+      counts.set(maxFace, counts.get(maxFace) + counts.get("J"));
+      counts.delete("J");
     }
-    // use the joker cards to greedily increase the count of the face with highest card count.
-    counts.set(maxFace, counts.get(maxFace) + counts.get("J"));
-    counts.delete("J");
-
     return counts;
   };
   return totalWinnings(lines.map(parseHand), countCards, strengthsWithJoker);
