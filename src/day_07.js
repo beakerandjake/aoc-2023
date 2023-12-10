@@ -7,6 +7,25 @@ import { sum } from "./util/array.js";
 import { characterCounts } from "./util/string.js";
 
 /**
+ * The default strengths of each card face.
+ */
+const defaultCardStrengths = [
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  "T",
+  "J",
+  "Q",
+  "K",
+  "A",
+].reduce((acc, x, i) => ({ ...acc, [x]: i }), {});
+
+/**
  * Parse a hand from a line of input.
  */
 const parseHand = (line) => {
@@ -42,10 +61,31 @@ const bid = (hand) => hand[1];
 /**
  * Calculates the total winnings of all hands.
  */
-const totalWinnings = (hands, handScoreFn, cardStrengths) => {
+const totalWinnings = (hands, countCardsFn, cardStrengths) => {
+  // returns the score of the hand, higher is better.
+  const score = (cardCounts) => {
+    switch (cardCounts.size) {
+      case 1:
+        // five of a kind.
+        return 50000;
+      case 2:
+        // four of a kind or full house.
+        return Math.max(...[...cardCounts.values()]) === 4 ? 41000 : 32100;
+      case 3:
+        // three of a kind or two pair.
+        return Math.max(...[...cardCounts.values()]) === 3 ? 31100 : 22100;
+      case 4:
+        // one pair
+        return 21110;
+      default:
+        // high card.
+        return 11111;
+    }
+  };
+
   // map each hand to the score of its hand.
   const scores = hands.reduce(
-    (acc, hand) => acc.set(hand, handScoreFn(characterCounts(cards(hand)))),
+    (acc, hand) => acc.set(hand, score(countCardsFn(cards(hand)))),
     new Map()
   );
 
@@ -68,36 +108,8 @@ const totalWinnings = (hands, handScoreFn, cardStrengths) => {
 /**
  * Returns the solution for level one of this puzzle.
  */
-export const levelOne = ({ lines }) => {
-  // create object which maps a card label to its strength.
-  const strengths = [2, 3, 4, 5, 6, 7, 8, 9, "T", "J", "Q", "K", "A"].reduce(
-    (acc, x, i) => ({ ...acc, [x]: i }),
-    {}
-  );
-
-  // returns the score of the hand, higher is better.
-  const score = (cardCounts) => {
-    switch (cardCounts.size) {
-      case 1:
-        // five of a kind.
-        return 50000;
-      case 2:
-        // four of a kind or full house.
-        return Math.max(...[...cardCounts.values()]) === 4 ? 41000 : 32100;
-      case 3:
-        // three of a kind or two pair.
-        return Math.max(...[...cardCounts.values()]) === 3 ? 31100 : 22100;
-      case 4:
-        // one pair
-        return 21110;
-      default:
-        // high card.
-        return 11111;
-    }
-  };
-
-  return totalWinnings(lines.map(parseHand), score, strengths);
-};
+export const levelOne = ({ lines }) =>
+  totalWinnings(lines.map(parseHand), characterCounts, defaultCardStrengths);
 
 /**
  * Returns the solution for level two of this puzzle.
