@@ -14,24 +14,12 @@ const parseHistory = (line) => parseDelimited(line, " ", Number);
 /**
  * Returns a new array containing the difference at each step of the history.
  */
-const sequence = (history) => {
-  const result = [];
-  for (let i = 1; i < history.length; i++) {
-    result.push(history[i] - history[i - 1]);
-  }
-  return result;
-};
+const sequence = (history) => history.slice(1).map((x, i) => x - history[i]);
 
 /**
  * Returns the prediction of the next value of the history based on its sequences.
  */
-const extrapolate = (sequences) => {
-  let nextValue = 0;
-  for (let i = 1; i < sequences.length; i++) {
-    nextValue += sequences[i].at(-1);
-  }
-  return nextValue;
-};
+const extrapolate = (sequences) => sum(sequences.map((x) => x.at(-1)));
 
 /**
  * Returns the prediction of the next value.
