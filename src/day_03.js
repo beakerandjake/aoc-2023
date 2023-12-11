@@ -4,7 +4,7 @@
  */
 
 import { sum, product } from "./util/array.js";
-import { mooreNeighborhood, neighborsForEach } from "./util/neighbors.js";
+import { mooreNeighborhood, neighbors } from "./util/neighbors.js";
 import { consume, isNumeric } from "./util/string.js";
 import { Vector2 } from "./util/vector2.js";
 
@@ -96,14 +96,14 @@ const findIntersectingPart = (position, parts) => {
  */
 const findPartNumbers = (schematic, parts, position) => {
   const partNumbers = new Set();
-  neighborsForEach(position, mooreNeighborhood, (neighbor) => {
+  for (const neighbor of neighbors(position, mooreNeighborhood)) {
     if (schematic.inBounds(neighbor)) {
       const intersecting = findIntersectingPart(neighbor, parts[neighbor.y]);
       if (intersecting) {
         partNumbers.add(intersecting);
       }
     }
-  });
+  }
   return [...partNumbers];
 };
 
