@@ -12,24 +12,15 @@ import { sum } from "./util/array.js";
 const parseHistory = (line) => parseDelimited(line, " ", Number);
 
 /**
- * Returns a new array containing the difference at each step of the history.
- */
-const sequence = (history) => history.slice(1).map((x, i) => x - history[i]);
-
-/**
- * Returns the prediction of the next value of the history based on its sequences.
- */
-const extrapolate = (sequences) => sum(sequences.map((x) => x.at(-1)));
-
-/**
  * Returns the prediction of the next value.
  */
 const nextValue = (history) => {
   const sequences = [history];
-  while (sequences.at(-1)?.some((x) => x !== 0)) {
-    sequences.push(sequence(sequences.at(-1)));
+  while (sequences.at(-1).some((x) => x !== 0)) {
+    const previous = sequences.at(-1);
+    sequences.push(previous.slice(1).map((x, i) => x - previous[i]));
   }
-  return extrapolate(sequences.reverse());
+  return sum(sequences.map((x) => x.at(-1)));
 };
 
 /**
