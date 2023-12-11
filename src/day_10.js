@@ -52,6 +52,8 @@ const findStart = ({ items, shape }) => {
  * F-J
  */
 
+const inBounds = ({ height, width }, { y, x }) =>
+  y >= 0 && y < height && x >= 0 && x < width;
 
 /**
  * Returns the solution for level one of this puzzle.
