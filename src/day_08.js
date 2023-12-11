@@ -6,6 +6,9 @@
 import { circularIterator } from "./util/array.js";
 import { lcm } from "./util/math.js";
 
+/**
+ * Parses the input and returns the instructions and the graph of nodes.
+ */
 const parseMaps = (lines) => {
   const graph = {};
   for (let i = 2; i < lines.length; i++) {
@@ -47,9 +50,11 @@ export const levelOne = ({ lines }) => {
  */
 export const levelTwo = ({ lines }) => {
   const [instructions, graph] = parseMaps(lines);
-  const nodes = Object.keys(graph).filter((node) => node.endsWith("A"));
-  const steps = nodes.map((node) =>
-    countSteps(instructions, graph, node, (x) => x.endsWith("Z"))
+  return lcm(
+    ...Object.keys(graph)
+      .filter((node) => node.endsWith("A"))
+      .map((node) =>
+        countSteps(instructions, graph, node, (x) => x.endsWith("Z"))
+      )
   );
-  return lcm(...steps);
 };
