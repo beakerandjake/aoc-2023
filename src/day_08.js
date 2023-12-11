@@ -3,24 +3,53 @@
  * Puzzle Description: https://adventofcode.com/2023/day/8
  */
 
+import { circularIterator } from "./util/array.js";
+import { lcm } from "./util/math.js";
+
+const parseMaps = (lines) => {
+  const graph = {};
+  for (let i = 2; i < lines.length; i++) {
+    graph[lines[i].slice(0, 3)] = {
+      left: lines[i].slice(7, 10),
+      right: lines[i].slice(12, 15),
+    };
+  }
+  return [lines[0], graph];
+};
+
+/**
+ * Follows the instructions and counts the number of steps before the end condition is reached.
+ */
+const countSteps = (instructions, graph, startNode, endPredicateFn) => {
+  const instructionIterator = circularIterator(instructions);
+  let steps = 0;
+  let node = startNode;
+  while (!endPredicateFn(node)) {
+    steps++;
+    node =
+      instructionIterator.next().value === "L"
+        ? graph[node].left
+        : graph[node].right;
+  }
+  return steps;
+};
+
 /**
  * Returns the solution for level one of this puzzle.
- * @param {Object} args - Provides both raw and split input.
- * @param {String} args.input - The original, unparsed input string.
- * @param {String[]} args.lines - Array containing each line of the input string.
- * @returns {Number|String}
  */
-export const levelOne = ({ input, lines }) => {
-  // your code here
+export const levelOne = ({ lines }) => {
+  const [instructions, graph] = parseMaps(lines);
+  return countSteps(instructions, graph, "AAA", (node) => node === "ZZZ");
 };
 
 /**
  * Returns the solution for level two of this puzzle.
- * @param {Object} args - Provides both raw and split input.
- * @param {String} args.input - The original, unparsed input string.
- * @param {String[]} args.lines - Array containing each line of the input string.
- * @returns {Number|String}
  */
-export const levelTwo = ({ input, lines }) => {
-  // your code here
+export const levelTwo = ({ lines }) => {
+  const [instructions, graph] = parseMaps(lines);
+  const nodes = Object.keys(graph).filter((node) => node.endsWith("A"));
+  const steps = nodes.map((node) =>
+    countSteps(instructions, graph, node, (x) => x.endsWith("Z"))
+  );
+  return lcm(...steps);
 };

@@ -74,3 +74,18 @@ export const zip = (...arrays) => {
   }
   return toReturn;
 };
+
+/**
+ * Iterator which loops over the array circularly, starts back at the first element after iterating past the last element.
+ * @param {Array} arr
+ */
+// eslint-disable-next-line func-style
+export function* circularIterator(arr) {
+  let index = 0;
+  while (true) {
+    if (index >= arr.length) {
+      index = 0;
+    }
+    yield arr[index++];
+  }
+}
