@@ -6,6 +6,16 @@ import { add, up, down, left, right } from "./vector2.js";
 export const vonNeumannNeighborhood = [up, down, left, right];
 
 /**
+ * Maps a cardinal direction to a delta.
+ */
+export const cardinalNeighborMap = new Map([
+  ["north", up],
+  ["south", down],
+  ["east", right],
+  ["west", left],
+]);
+
+/**
  * Deltas for the Moore neighborhood of a cell.
  */
 export const mooreNeighborhood = [
