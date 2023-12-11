@@ -3,9 +3,12 @@
  * Puzzle Description: https://adventofcode.com/2023/day/10
  */
 
-import { cardinalNeighborMap } from "./util/neighbors.js";
-import { Vector2, add } from "./util/vector2.js";
+import { cardinalNeighbors } from "./util/neighbors.js";
+import { Vector2 } from "./util/vector2.js";
 
+/**
+ * Maps each pipe tile to neighbors which it can connect it.
+ */
 const pipeConnections = new Map([
   ["|", { north: new Set(["|", "7", "F"]), south: new Set(["|", "L", "J"]) }],
   ["-", { east: new Set(["-", "J", "7"]), west: new Set(["-", "L", "F"]) }],
@@ -15,10 +18,16 @@ const pipeConnections = new Map([
   ["F", { south: new Set(["|", "L", "J"]), east: new Set(["-", "J", "7"]) }],
 ]);
 
+/**
+ * Parse the input and returns the world.
+ */
 const parseWorld = (lines) => ({
   items: lines,
   shape: { height: lines.length, width: lines[0].length },
 });
+
+const inBounds = ({ height, width }, { y, x }) =>
+  y >= 0 && y < height && x >= 0 && x < width;
 
 const findStart = ({ items, shape }) => {
   // return the position of the "S" tile.
@@ -35,48 +44,48 @@ const findStart = ({ items, shape }) => {
 
   // return the type of pipe of the "S" tile.
   const findTile = (position) => {
-    // const neighbors = new Map();
-    // for(const [direction, delta] of cardinalNeighborMap.entries()){
-    //   const neighbor =
-    // }
-    return "J";
+    // test every tile type and return the first tile which is connected to two neighbors.
+    for (const [tile, connections] of pipeConnections.entries()) {
+      const connected = [...cardinalNeighbors(position)].filter(
+        ([pos, dir]) => {
+          const neighbor = inBounds(shape, pos) ? items[pos.y][pos.x] : null;
+          return neighbor && connections[dir]?.has(neighbor);
+        }
+      );
+      if (connected.length === 2) {
+        return tile;
+      }
+    }
+    throw new Error("Could not find start tile type");
   };
-
   const position = findPosition();
   return { position, tile: findTile(position) };
 };
 
 /**
- * ||F
- * LS|
- * F-J
+ *
  */
-
-const inBounds = ({ height, width }, { y, x }) =>
-  y >= 0 && y < height && x >= 0 && x < width;
-
-/**
- * Returns the solution for level one of this puzzle.
- */
-export const levelOne = ({ lines }) => {
-  const world = parseWorld(lines);
-  let maxDistance = 0;
+const bfs = (world, visitFn) => {
   const visited = new Set();
   const queue = [{ ...findStart(world), distance: 0 }];
-  // const queue = new Queue({ ...findStart(world), distance: 0 });
   while (queue.length) {
-    const { position, tile, distance } = queue.shift();
-    if (!visited.has(position.toString())) {
+    const current = queue.shift();
+    if (!visited.has(current.position.toString())) {
+      const { position, tile, distance } = current;
+
+      // mark current as visited.
       visited.add(position.toString());
-      maxDistance = Math.max(distance, maxDistance);
-      for (const [direction, delta] of cardinalNeighborMap.entries()) {
-        const neighborPosition = add(position, delta);
-        if (inBounds(world.shape, neighborPosition)) {
-          const neighborTile =
-            world.items[neighborPosition.y][neighborPosition.x];
+      if (visitFn(current) === true) {
+        break;
+      }
+
+      // visit each neighbor
+      for (const [neighbor, direction] of cardinalNeighbors(position)) {
+        if (inBounds(world.shape, neighbor)) {
+          const neighborTile = world.items[neighbor.y][neighbor.x];
           if (pipeConnections.get(tile)[direction]?.has(neighborTile)) {
             queue.push({
-              position: neighborPosition,
+              position: neighbor,
               tile: neighborTile,
               distance: distance + 1,
             });
@@ -85,6 +94,18 @@ export const levelOne = ({ lines }) => {
       }
     }
   }
+  return visited;
+};
+
+/**
+ * Returns the solution for level one of this puzzle.
+ */
+export const levelOne = ({ lines }) => {
+  const world = parseWorld(lines);
+  let maxDistance = 0;
+  bfs(world, ({ distance }) => {
+    maxDistance = Math.max(distance, maxDistance);
+  });
   return maxDistance;
 };
 
