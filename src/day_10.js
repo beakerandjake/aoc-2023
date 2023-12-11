@@ -62,14 +62,13 @@ export const levelOne = ({ lines }) => {
   const world = parseWorld(lines);
   let maxDistance = 0;
   const visited = new Set();
-  const copy = world.items.map((x) => [...x]);
   const queue = [{ ...findStart(world), distance: 0 }];
+  // const queue = new Queue({ ...findStart(world), distance: 0 });
   while (queue.length) {
     const { position, tile, distance } = queue.shift();
     if (!visited.has(position.toString())) {
       visited.add(position.toString());
       maxDistance = Math.max(distance, maxDistance);
-      copy[position.y][position.x] = `${distance}`;
       for (const [direction, delta] of cardinalNeighborMap.entries()) {
         const neighborPosition = add(position, delta);
         if (inBounds(world.shape, neighborPosition)) {
