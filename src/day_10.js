@@ -58,9 +58,11 @@ const bfs = (world, startPosition, visitFn) => {
     // skip node if visited.
     if (!visited.has(current.position.toString())) {
       const { position, distance } = current;
+      
       // visit current.
       visited.add(position.toString());
       visitFn(current);
+
       // visit each neighbor
       const currentTile = world.elementAt(position);
       for (const [neighbor, direction] of cardinalNeighbors(position)) {
