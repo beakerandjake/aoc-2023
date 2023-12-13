@@ -58,11 +58,8 @@ export class FlatArray extends Array {
    */
   /* eslint-disable func-style */
   elements2d = function* () {
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        const position = new Vector2(y, x);
-        yield [this.elementAt(position), position];
-      }
+    for (let i = 0; i < this.length; i++) {
+      yield [this[i], this.indexToPosition(i)];
     }
   };
 
@@ -78,10 +75,16 @@ export class FlatArray extends Array {
     return rows.map((row) => row.join("")).join("\n");
   }
 
+  /**
+   * Converts the *flat* index into a 2d coordinate.
+   */
   indexToPosition(index) {
     return new Vector2(Math.floor(index / this.width), index % this.width);
   }
 
+  /**
+   * Converts the 2d coordinate into a *flat* index.
+   */
   positionToIndex({ x, y }) {
     return this.width * y + x;
   }
