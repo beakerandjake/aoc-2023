@@ -5,33 +5,62 @@ import { Vector2 } from "./vector2.js";
  */
 export class FlatArray extends Array {
   /**
-   * Convert an array of strings into a flat 2d array.
-   * Each string in the array is considered a row, and each character of that string is treated as a column.
-   * @param {string[]} array - Array of equal length strings to convert to a flat 2d array.
-   * @param {(char:string, y:number, x:number) => string} mapFn - Map function invoked on every char of the string
-   * @returns {FlatArray}
+   * Creates a new flat array.
+   * @param {Any[]} items - The flattened items (in c memory order).
+   * @param {number} height - The number of rows in the 2d array.
+   * @param {number} width - The number of columns in the 2d array.
    */
+  constructor(items, height, width) {
+    super(...items);
+    this.height = height;
+    this.width = width;
+  }
 
   /**
    * Creates a flat array from an array of string.
    * Each string in the array is considered a row, and each character of that string is treated as a column.
    * @param {string[]} items - Array of equal length strings to convert to a flat 2d array.
    */
-  constructor(array) {
+  static fromStringArray(array) {
     if (!array?.length) {
       throw new Error("Cannot construct a FlatArray from an empty array");
     }
-    super(...array.flatMap((str) => [...str]));
-    this.height = array.length;
-    this.width = array[0].length;
+    return new FlatArray(
+      array.flatMap((str) => [...str]),
+      array.length,
+      array[0].length
+    );
   }
 
+  /**
+   * Returns a new flat 2d array filled with the value. Note all elements in the array will be this exact value: if value is an object, each slot in the array will reference that object.
+   * @param {number} height
+   * @param {number} width
+   * @param {Any} value
+   */
+  static fill(height, width, value) {
+    return new FlatArray(Array(width * height).fill(value), height, width);
+  }
+
+  /**
+   * Converts the *flat* index into a 2d coordinate.
+   */
+  indexToPosition(index) {
+    return new Vector2(Math.floor(index / this.width), index % this.width);
+  }
+
+  /**
+   * Converts the 2d coordinate into a *flat* index.
+   */
+  positionToIndex({ x, y }) {
+    return this.width * y + x;
+  }
   /**
    * Returns the element at the position.
    * @param {Vector2} position
    */
-  elementAt({ y, x }) {
-    return this[this.width * y + x];
+  elementAt(position) {
+    return this[this.positionToIndex(position)];
   }
 
   /**
@@ -39,8 +68,8 @@ export class FlatArray extends Array {
    * @param {Vector2} position
    * @param {Any} value
    */
-  updateAt({ y, x }, value) {
-    this[this.width * y + x] = value;
+  updateAt(position, value) {
+    this[this.positionToIndex(position)] = value;
   }
 
   /**
@@ -57,35 +86,21 @@ export class FlatArray extends Array {
    * @returns {Iterator<[Any, Vector2]>} A new iterator that yields [element, position] pairs for each element of the 2d array.
    */
   /* eslint-disable func-style */
-  elements2d = function* () {
+  *elements2d() {
     for (let i = 0; i < this.length; i++) {
       yield [this[i], this.indexToPosition(i)];
     }
-  };
+  }
 
   /**
    * Returns a string representation of this flat array.
    * @param {(string, Vector2) => string} renderFn - optional function used to render elements.
    */
-  toString(renderFn) {
+  toString(renderFn = (elem) => elem) {
     const rows = [...Array(this.height)].map(() => []);
     for (const [item, position] of this.elements2d()) {
-      rows[position.y].push(renderFn ? renderFn(item, position) : item);
+      rows[position.y].push(renderFn(item, position));
     }
     return rows.map((row) => row.join("")).join("\n");
-  }
-
-  /**
-   * Converts the *flat* index into a 2d coordinate.
-   */
-  indexToPosition(index) {
-    return new Vector2(Math.floor(index / this.width), index % this.width);
-  }
-
-  /**
-   * Converts the 2d coordinate into a *flat* index.
-   */
-  positionToIndex({ x, y }) {
-    return this.width * y + x;
   }
 }
