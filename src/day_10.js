@@ -24,22 +24,27 @@ const pipeConnections = new Map([
 const parseWorld = (lines) => {
   // guess the type of pipe the start tile based off of its neighbors.
   const guessStartTile = (world, startPosition) => {
-    for (const [tile, connections] of pipeConnections.entries()) {
-      let connectedCount = 0;
+    let guess;
+    let maxConnections = 0;
+    for (const [pipe, connections] of pipeConnections.entries()) {
+      let count = 0;
+      // count the number of neighbor tiles this pipe type connects to.
       for (const [pos, dir] of cardinalNeighbors(startPosition)) {
         const neighbor = world.inBounds(pos) ? world.elementAt(pos) : null;
         if (neighbor && connections[dir]?.has(neighbor)) {
-          connectedCount++;
+          count++;
         }
       }
-      if (connectedCount === 2) {
-        return tile;
+      // always take the pipe with the most neighboring connections.
+      if (count > maxConnections) {
+        guess = pipe;
+        maxConnections = count;
       }
     }
-    throw new Error("Could not determine start tile type.");
+    return guess;
   };
 
-  const world = new FlatArray(lines);
+  const world = FlatArray.fromStringArray(lines);
   const startIndex = world.findIndex((x) => x === "S");
   const startPosition = world.indexToPosition(startIndex);
   // "fix" the input by replacing the state tile "S" with it's actual pipe character.
@@ -48,35 +53,30 @@ const parseWorld = (lines) => {
 };
 
 /**
- * Explore the entire loop from the start location.
+ * Returns an iterator which will explore the pipe loop.
  */
-const bfs = (world, startPosition, visitFn) => {
-  const visited = new Set();
-  const queue = [{ position: startPosition, distance: 0 }];
+// eslint-disable-next-line func-style
+function* bfs(world, start) {
+  const visited = new Set([start.hash()]);
+  const queue = [{ position: start, distance: 0 }];
   while (queue.length) {
-    const current = queue.shift();
-    // skip node if visited.
-    if (!visited.has(current.position.toString())) {
-      const { position, distance } = current;
-      
-      // visit current.
-      visited.add(position.toString());
-      visitFn(current);
-
-      // visit each neighbor
-      const currentTile = world.elementAt(position);
-      for (const [neighbor, direction] of cardinalNeighbors(position)) {
-        if (world.inBounds(neighbor)) {
-          const neighborTile = world.elementAt(neighbor);
-          if (pipeConnections.get(currentTile)[direction]?.has(neighborTile)) {
-            queue.push({ position: neighbor, distance: distance + 1 });
-          }
-        }
+    yield queue.at(0);
+    const { position, distance } = queue.shift();
+    const connections = pipeConnections.get(world.elementAt(position));
+    for (const [neighbor, direction] of cardinalNeighbors(position)) {
+      // only explore neighbors which connect to the current pipe.
+      if (
+        world.inBounds(neighbor) &&
+        !visited.has(neighbor.hash()) &&
+        connections[direction]?.has(world.elementAt(neighbor))
+      ) {
+        visited.add(neighbor.hash());
+        queue.push({ position: neighbor, distance: distance + 1 });
       }
     }
   }
   return visited;
-};
+}
 
 /**
  * Returns the solution for level one of this puzzle.
@@ -84,15 +84,38 @@ const bfs = (world, startPosition, visitFn) => {
 export const levelOne = ({ lines }) => {
   const { world, startPosition } = parseWorld(lines);
   let maxDistance = 0;
-  bfs(world, startPosition, ({ distance }) => {
+  for (const { distance } of bfs(world, startPosition)) {
     maxDistance = Math.max(distance, maxDistance);
-  });
+  }
   return maxDistance;
+};
+
+const renderMap = {
+  "|": "│",
+  "-": "─",
+  L: "└",
+  J: "┘",
+  7: "┐",
+  F: "┌",
+};
+
+const printWorld = (lines) => {
+  const { world, startPosition } = parseWorld(lines);
+  const render = FlatArray.fill(world.height, world.width, ".");
+  for (const { position } of bfs(world, startPosition)) {
+    render.updateAt(position, renderMap[world.elementAt(position)]);
+  }
+  console.log(render.toString());
 };
 
 /**
  * Returns the solution for level two of this puzzle.
  */
-export const levelTwo = ({ input, lines }) => {
-  // your code here
+export const levelTwo = ({ lines }) => {
+  printWorld(lines);
+  // const { world, startPosition } = parseWorld(lines);
+  // const fill = FlatArray.fill(world.height, world.width, ".");
+  // const visited = exploreLoop(world, startPosition, () => {});
+  // console.log(memo.toString());
+  return 1234;
 };

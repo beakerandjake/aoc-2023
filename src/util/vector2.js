@@ -7,8 +7,12 @@ export class Vector2 {
     this.x = x;
   }
 
-  toString() {
+  hash() {
     return `${this.y} ${this.x}`;
+  }
+
+  toString() {
+    return `<${this.y},${this.x}>`;
   }
 }
 
